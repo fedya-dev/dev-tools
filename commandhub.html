@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ===== SEO META TAGS ===== -->
+    <title>CommandHub - Споделен архив с Ubuntu и PowerShell команди</title>
+    <meta name="description" content="Централизиран архив с полезни Ubuntu Linux и PowerShell команди. Добавяй, търси, копирай и споделяй скриптове с колегите.">
+    <meta name="keywords" content="Ubuntu команди, PowerShell скриптове, Linux администрация, DevOps, системни администратори, command hub">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://komandi.pages.dev">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://komandi.pages.dev">
+    <meta property="og:title" content="CommandHub - Споделен архив с Ubuntu и PowerShell команди">
+    <meta property="og:description" content="Централизиран архив с полезни Ubuntu Linux и PowerShell команди. Добавяй, търси, копирай и споделяй скриптове с колегите.">
+    <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐧</text></svg>">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CommandHub - Споделен архив с Ubuntu и PowerShell команди">
+    <meta name="twitter:description" content="Централизиран архив с полезни Ubuntu Linux и PowerShell команди.">
+    
+    <!-- Theme color -->
+    <meta name="theme-color" content="#0b0e14">
+    
+    <!-- ===== FAVICON ===== -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐧</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐧</text></svg>">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0b0e14;
+            color: #e4e9f2;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid #2a313c;
+            padding-bottom: 1.5rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-left .logo {
+            font-size: 2.5rem;
+            line-height: 1;
+            background: #1e1e2a;
+            padding: 8px 14px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(233, 84, 32, 0.2);
+        }
+
+        .header-left h1 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: -0.5px;
+        }
+
+        .header-left h1 span {
+            color: #e95420;
+        }
+
+        .header-left .subtitle {
+            font-size: 0.75rem;
+            color: #6a7f99;
+            font-weight: 400;
+            display: block;
+            margin-top: -2px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #1e2a36;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: #b0c4de;
+            border: 1px solid #2e3b4a;
+        }
+
+        .badge i {
+            margin-right: 6px;
+            color: #e95420;
+        }
+
+        .badge.online {
+            border-color: #2a7a3a;
+            color: #7aca7a;
+        }
+
+        .badge.offline {
+            border-color: #7a3a3a;
+            color: #ca7a7a;
+        }
+
+        .admin-badge {
+            background: #2a3a2a;
+            border-color: #3a5a3a;
+            color: #7aca7a;
+        }
+        
+        .admin-badge i {
+            color: #ffd700;
+        }
+
+        .card {
+            background: #141a22;
+            border-radius: 20px;
+            padding: 1.8rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #232b36;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transition: border 0.2s;
+        }
+
+        .card:hover {
+            border-color: #2f3d4e;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #c8d0dc;
+        }
+
+        .card-title i {
+            color: #e95420;
+            width: 22px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #8b9aad;
+        }
+
+        input, select, textarea {
+            background: #1c2530;
+            border: 1px solid #2e3a48;
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: #e4e9f2;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #e95420;
+            box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.2);
+            background: #1f2a36;
+        }
+
+        select option {
+            background: #1c2530;
+            color: #e4e9f2;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .btn {
+            background: #e95420;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            width: fit-content;
+        }
+
+        .btn:hover {
+            background: #d1441a;
+            transform: scale(0.98);
+            box-shadow: 0 4px 14px rgba(233, 84, 32, 0.35);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #3a485a;
+            color: #c8d0dc;
+        }
+
+        .btn-outline:hover {
+            background: #1c2530;
+            border-color: #e95420;
+            color: white;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: #1a7a3a;
+        }
+
+        .btn-success:hover {
+            background: #15662f;
+        }
+
+        .btn-danger {
+            background: #7a2a2a;
+        }
+
+        .btn-danger:hover {
+            background: #6a1a1a;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 0.8rem;
+            align-items: center;
+        }
+
+        .file-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .file-actions .btn {
+            padding: 8px 18px;
+            font-size: 0.85rem;
+        }
+
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        .category-pill {
+            background: #1e2a36;
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid #2e3b4a;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .category-pill .remove-cat {
+            cursor: pointer;
+            color: #7a8fa8;
+            transition: 0.2s;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .category-pill .remove-cat:hover {
+            color: #e07070;
+        }
+
+        .add-category-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .add-category-form input {
+            width: 150px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .add-category-form .btn {
+            padding: 6px 16px;
+            font-size: 0.85rem;
+        }
+
+        .search-wrapper {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-wrapper input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-wrapper select {
+            width: auto;
+            min-width: 140px;
+        }
+
+        .commands-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .command-item {
+            background: #0f151d;
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            border-left: 4px solid #e95420;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem 1.5rem;
+            transition: 0.15s;
+            border: 1px solid #1f2935;
+            border-left-width: 5px;
+        }
+
+        .command-item.powershell {
+            border-left-color: #4a90d9;
+        }
+
+        .command-item:hover {
+            background: #151d27;
+            border-color: #2e3f50;
+        }
+
+        .command-info {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .command-info .cmd-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .command-info .cmd-name .category-tag {
+            font-size: 0.7rem;
+            background: #1e2a3a;
+            padding: 2px 12px;
+            border-radius: 20px;
+            color: #b0c9e0;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            border: 1px solid #2e4055;
+        }
+
+        .command-info .cmd-name .type-badge {
+            font-size: 0.65rem;
+            background: #2a1a2a;
+            padding: 2px 10px;
+            border-radius: 20px;
+            color: #d4a0d4;
+            font-weight: 400;
+            border: 1px solid #3a2a3a;
+        }
+
+        .command-info .cmd-name .type-badge.pwsh {
+            background: #1a2a3a;
+            color: #90b8d9;
+            border-color: #2a3a4a;
+        }
+
+        .command-info .cmd-desc {
+            color: #a0b2c9;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .command-code {
+            flex: 1.2;
+            min-width: 180px;
+            background: #0b1017;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #b8d0e8;
+            border: 1px solid #26323f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .command-code code {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .command-code .copy-btn {
+            background: transparent;
+            border: none;
+            color: #7a8fa8;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px 6px;
+            border-radius: 8px;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .command-code .copy-btn:hover {
+            color: #e95420;
+            background: #1f2a36;
+        }
+
+        .command-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .command-actions button {
+            background: transparent;
+            border: none;
+            color: #6a7f99;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 10px;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .command-actions .delete-btn:hover {
+            background: #2a1a1a;
+            color: #e07070;
+        }
+
+        .command-actions .edit-btn:hover {
+            background: #1a2633;
+            color: #e0b070;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6a7f99;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            opacity: 0.4;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== PAGINATION ===== */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 0.5rem 0;
+            border-top: 1px solid #1f2935;
+        }
+
+        .pagination-info {
+            color: #8b9aad;
+            font-size: 0.9rem;
+        }
+
+        .pagination-info strong {
+            color: #e4e9f2;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-buttons .btn {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            min-width: 40px;
+            justify-content: center;
+        }
+
+        .pagination-buttons .btn.active {
+            background: #e95420;
+            border-color: #e95420;
+            color: white;
+        }
+
+        .pagination-buttons .btn.active:hover {
+            background: #d1441a;
+        }
+
+        .pagination-buttons .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .items-per-page {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b9aad;
+            font-size: 0.85rem;
+        }
+
+        .items-per-page select {
+            width: auto;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            background: #1c2530;
+            border: 1px solid #2e3a48;
+            border-radius: 8px;
+            color: #e4e9f2;
+        }
+
+        #categoriesModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        #categoriesModal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #141a22;
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #2a313c;
+        }
+
+        #passwordModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(6px);
+        }
+        
+        #passwordModal.active {
+            display: flex;
+        }
+        
+        .password-modal-content {
+            background: #141a22;
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid #2a313c;
+            text-align: center;
+        }
+        
+        .password-modal-content .lock-icon {
+            font-size: 3rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+        
+        .password-modal-content input {
+            background: #1c2530;
+            border: 1px solid #2e3a48;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #e4e9f2;
+            font-size: 1rem;
+            width: 100%;
+            margin: 1rem 0;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        
+        .password-modal-content input:focus {
+            border-color: #e95420;
+            box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.2);
+        }
+        
+        .password-modal-content .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .password-modal-content .error-msg {
+            color: #e07070;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .password-modal-content .error-msg.show {
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e2a36;
+            color: #e4e9f2;
+            padding: 14px 26px;
+            border-radius: 40px;
+            border-left: 5px solid #e95420;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            transform: translateY(80px);
+            opacity: 0;
+            transition: 0.3s ease;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(6px);
+            background: rgba(20, 28, 38, 0.9);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: start; }
+            .command-item { flex-direction: column; align-items: stretch; }
+            .command-code { white-space: normal; flex-wrap: wrap; }
+            .command-actions { align-self: flex-end; }
+            .search-wrapper { flex-direction: column; align-items: stretch; }
+            .search-wrapper select { width: 100%; }
+            .categories-container { flex-direction: column; align-items: stretch; }
+            .add-category-form { flex-wrap: wrap; }
+            .add-category-form input { width: 100%; }
+            .password-modal-content { padding: 1.5rem; }
+            .pagination-container {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .pagination-buttons {
+                justify-content: center;
+            }
+            .items-per-page {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="header-left">
+            <span class="logo">🐧</span>
+            <div>
+                <h1>Command<span>Hub</span></h1>
+                <span class="subtitle">Ubuntu &amp; PowerShell команди за администратори</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <a href="https://fedia.eu/" target="_blank" rel="noopener" class="badge" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:0.2s;" title="Към fedia.eu" onmouseover="this.style.borderColor='#e95420';this.style.color='#e95420'" onmouseout="this.style.borderColor='#2e3b4a';this.style.color='#b0c4de'">
+                <span style="font-size:1.1rem">🌐</span> Към fedia.eu
+            </a>
+            <a href="dev-tools.html" class="badge" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:0.2s;" title="Dev Tools Pro" onmouseover="this.style.borderColor='#e95420';this.style.color='#e95420'" onmouseout="this.style.borderColor='#2e3b4a';this.style.color='#b0c4de'">
+                <span style="font-size:1.1rem">🛠️</span> Dev Tools
+            </a>
+            <span class="badge admin-badge" id="adminBadge"><i class="fas fa-lock"></i> <span id="adminStatus">🔒 Защитено</span></span>
+            <span class="badge" id="syncStatus"><i class="fas fa-cloud-upload-alt"></i> <span id="syncText">Локално</span></span>
+            <span class="badge"><i class="fas fa-database"></i> <span id="countDisplay">0</span> команди</span>
+            <button class="btn btn-outline" id="unlockBtn" style="padding:6px 16px;"><i class="fas fa-key"></i> <span id="unlockText">Отключи</span></button>
+            <button class="btn btn-outline" id="clearAllBtn" style="padding:6px 16px; display:none;"><i class="fas fa-trash-alt"></i> Изчисти всички</button>
+        </div>
+    </header>
+
+    <!-- ===== ADD COMMAND ===== -->
+    <section class="card" aria-label="Добавяне на команда">
+        <div class="card-title"><i class="fas fa-plus-circle"></i> Добави нова команда</div>
+        <form id="commandForm" novalidate>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cmdName">Име / етикет</label>
+                    <input type="text" id="cmdName" placeholder="напр. Update system" required>
+                </div>
+                <div class="form-group">
+                    <label for="cmdType">Тип</label>
+                    <select id="cmdType">
+                        <option value="bash">🐧 Bash / Ubuntu</option>
+                        <option value="powershell">🪟 PowerShell</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cmdCategory">Категория</label>
+                    <select id="cmdCategory"></select>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-outline" id="manageCategoriesBtn" style="padding:6px 16px; font-size:0.85rem;">
+                        <i class="fas fa-cog"></i> Управление на категории
+                    </button>
+                </div>
+                <div class="form-group full-width">
+                    <label for="cmdDesc">Описание</label>
+                    <input type="text" id="cmdDesc" placeholder="Кратко описание какво прави командата...">
+                </div>
+                <div class="form-group full-width">
+                    <label for="cmdCode">Команда / скрипт</label>
+                    <textarea id="cmdCode" placeholder="sudo apt update &amp;&amp; sudo apt upgrade -y" required></textarea>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button type="submit" class="btn"><i class="fas fa-save"></i> Запази</button>
+                <button type="reset" class="btn btn-outline"><i class="fas fa-undo-alt"></i> Изчисти формата</button>
+                <button type="button" class="btn btn-outline" id="syncBtn" style="padding:6px 18px;"><i class="fas fa-sync"></i> Синхронизирай</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- ===== SYNC & FILE OPERATIONS ===== -->
+    <section class="card" style="padding: 1.2rem 2rem;" aria-label="Синхронизация и файлови операции">
+        <div class="card-title" style="margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Синхронизация със сървъра</div>
+        <div class="file-actions">
+            <button class="btn btn-success" id="syncToServerBtn"><i class="fas fa-upload"></i> Качи на сървъра</button>
+            <button class="btn btn-outline" id="loadFromServerBtn"><i class="fas fa-download"></i> Зареди от сървъра</button>
+            <button class="btn btn-danger" id="deleteFromServerBtn" style="display:none;"><i class="fas fa-trash-alt"></i> Изтрий всички от сървъра</button>
+            <span style="color:#6a7f99; font-size:0.85rem; margin-left: 8px;">
+                <i class="fas fa-info-circle"></i> Данните се съхраняват в Cloudflare KV
+            </span>
+        </div>
+        <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-outline" id="exportBtn" style="padding: 6px 16px; font-size:0.85rem;">
+                <i class="fas fa-download"></i> Експорт към JSON файл
+            </button>
+            <button class="btn btn-outline" id="importBtn" style="padding: 6px 16px; font-size:0.85rem;">
+                <i class="fas fa-upload"></i> Импорт от JSON файл
+            </button>
+            <input type="file" id="fileInput" accept=".json" class="hidden">
+        </div>
+        <!-- ⚠️ СКРИТ ДОКАТО НЕ СЕ ОТКЛЮЧИ АДМИНИСТРАТОРСКИ РЕЖИМ -->
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #1f2935; display:none;" id="adminConfigSection">
+            <button class="btn btn-outline" id="reloadConfigBtn" style="padding: 6px 16px; font-size:0.8rem;">
+                <i class="fas fa-sync-alt"></i> Презареди паролата от config.json
+            </button>
+            <span style="color:#6a7f99; font-size:0.75rem; margin-left: 8px;">
+                <i class="fas fa-shield-alt"></i> Само за администратори
+            </span>
+        </div>
+    </section>
+
+    <!-- ===== CATEGORIES MODAL ===== -->
+    <div id="categoriesModal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.4rem;"><i class="fas fa-tags" style="color:#e95420;"></i> Управление на категории</h2>
+                <button id="closeModalBtn" style="background: none; border: none; color: #8b9aad; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="categories-container" id="categoriesList"></div>
+            <div class="add-category-form" style="margin-top: 1rem; border-top: 1px solid #1f2935; padding-top: 1rem;">
+                <input type="text" id="newCategoryInput" placeholder="Нова категория..." style="flex:1;">
+                <button class="btn" id="addCategoryBtn" style="padding: 6px 18px;"><i class="fas fa-plus"></i> Добави</button>
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline" id="resetDefaultCategoriesBtn" style="padding: 6px 16px; font-size:0.85rem;">
+                    <i class="fas fa-undo"></i> Възстанови стандартните
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PASSWORD MODAL ===== -->
+    <div id="passwordModal">
+        <div class="password-modal-content">
+            <div class="lock-icon">🔐</div>
+            <h3 style="margin-bottom: 0.5rem;">Въведи парола за администраторски достъп</h3>
+            <p style="color: #8b9aad; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                <span id="passwordAction">Изтриване на команда</span>
+            </p>
+            <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="off" maxlength="20">
+            <div class="error-msg" id="passwordError">Грешна парола! Опитай отново.</div>
+            <div class="btn-group">
+                <button class="btn btn-danger" id="passwordConfirmBtn"><i class="fas fa-check"></i> Потвърди</button>
+                <button class="btn btn-outline" id="passwordCancelBtn"><i class="fas fa-times"></i> Отказ</button>
+            </div>
+            <div style="margin-top: 1rem; border-top: 1px solid #1f2935; padding-top: 0.8rem;">
+                <button class="btn btn-outline" id="changePasswordBtn" style="padding: 4px 12px; font-size:0.75rem;">
+                    <i class="fas fa-key"></i> Смени паролата (във файл)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SEARCH & FILTER ===== -->
+    <section class="card" style="padding: 1.2rem 2rem;" aria-label="Търсене и филтриране">
+        <div class="search-wrapper">
+            <i class="fas fa-search" style="color:#6a7f99;"></i>
+            <input type="text" id="searchInput" placeholder="Търси по име, описание, команда или категория...">
+            <select id="categoryFilter">
+                <option value="all">Всички категории</option>
+            </select>
+            <select id="typeFilter">
+                <option value="all">Всички типове</option>
+                <option value="bash">🐧 Bash</option>
+                <option value="powershell">🪟 PowerShell</option>
+            </select>
+            <button class="btn btn-outline" id="clearSearchBtn" style="padding:6px 18px;"><i class="fas fa-times"></i></button>
+        </div>
+    </section>
+
+    <!-- ===== COMMANDS LIST ===== -->
+    <section class="card" style="padding: 1rem 0 0 0; border: none; background: transparent; box-shadow: none;" aria-label="Списък с команди">
+        <div id="commandsContainer" class="commands-grid"></div>
+        
+        <!-- ===== PAGINATION ===== -->
+        <div class="pagination-container" id="paginationContainer">
+            <div class="pagination-info">
+                Показва <strong id="pageStart">0</strong> - <strong id="pageEnd">0</strong> от <strong id="totalCount">0</strong> команди
+            </div>
+            <div class="items-per-page">
+                <label for="itemsPerPage">На страница:</label>
+                <select id="itemsPerPage">
+                    <option value="10">10</option>
+                    <option value="15" selected>15</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="pagination-buttons" id="paginationButtons"></div>
+        </div>
+    </section>
+
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast">
+    <i class="fas fa-check-circle" style="color:#4caf50;"></i>
+    <span id="toastMessage">Копирано!</span>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+    (function() {
+        'use strict';
+
+        // ================================================================
+        // КОНФИГУРАЦИЯ
+        // ================================================================
+        const API_URL = 'https://command-hub-api.fedia.workers.dev/api/data';
+        const CONFIG_FILE = 'config.json';
+        let storedPassword = null;
+        let isPasswordLoaded = false;
+
+        // ================================================================
+        // STATE
+        // ================================================================
+        let commands = [];
+        let categories = ['System', 'Network', 'Docker', 'Git', 'Package', 'Script', 'Other'];
+        let editingId = null;
+        let isSyncing = false;
+        let isUnlocked = false;
+        let pendingDeleteId = null;
+        let pendingEditId = null;
+        let pendingAction = null;
+        
+        let currentPage = 1;
+        let itemsPerPage = 15;
+        let filteredCommands = [];
+
+        // DOM refs
+        const form = document.getElementById('commandForm');
+        const nameInput = document.getElementById('cmdName');
+        const descInput = document.getElementById('cmdDesc');
+        const codeInput = document.getElementById('cmdCode');
+        const categorySelect = document.getElementById('cmdCategory');
+        const typeSelect = document.getElementById('cmdType');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const container = document.getElementById('commandsContainer');
+        const countDisplay = document.getElementById('countDisplay');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMessage');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const fileInput = document.getElementById('fileInput');
+        const manageCategoriesBtn = document.getElementById('manageCategoriesBtn');
+        const categoriesModal = document.getElementById('categoriesModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const categoriesList = document.getElementById('categoriesList');
+        const newCategoryInput = document.getElementById('newCategoryInput');
+        const addCategoryBtn = document.getElementById('addCategoryBtn');
+        const resetDefaultCategoriesBtn = document.getElementById('resetDefaultCategoriesBtn');
+        const syncBtn = document.getElementById('syncBtn');
+        const syncToServerBtn = document.getElementById('syncToServerBtn');
+        const loadFromServerBtn = document.getElementById('loadFromServerBtn');
+        const deleteFromServerBtn = document.getElementById('deleteFromServerBtn');
+        const syncStatus = document.getElementById('syncStatus');
+        const syncText = document.getElementById('syncText');
+        const adminStatus = document.getElementById('adminStatus');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const unlockText = document.getElementById('unlockText');
+        const adminBadge = document.getElementById('adminBadge');
+        const reloadConfigBtn = document.getElementById('reloadConfigBtn');
+        const adminConfigSection = document.getElementById('adminConfigSection');
+        
+        // Pagination DOM
+        const paginationButtons = document.getElementById('paginationButtons');
+        const pageStart = document.getElementById('pageStart');
+        const pageEnd = document.getElementById('pageEnd');
+        const totalCount = document.getElementById('totalCount');
+        const itemsPerPageSelect = document.getElementById('itemsPerPage');
+
+        // Password modal
+        const passwordModal = document.getElementById('passwordModal');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordError = document.getElementById('passwordError');
+        const passwordConfirmBtn = document.getElementById('passwordConfirmBtn');
+        const passwordCancelBtn = document.getElementById('passwordCancelBtn');
+        const passwordAction = document.getElementById('passwordAction');
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+
+        let toastTimer = null;
+
+        // ================================================================
+        // ЗАРЕЖДАНЕ НА ПАРОЛАТА ОТ ВЪНШЕН JSON ФАЙЛ
+        // ================================================================
+        async function loadPasswordFromFile() {
+            try {
+                showToast('🔄 Зареждане на паролата от config.json...');
+                const response = await fetch(CONFIG_FILE + '?t=' + Date.now());
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} - Файлът config.json не е намерен или е недостъпен`);
+                }
+                const data = await response.json();
+                if (data.adminPassword && typeof data.adminPassword === 'string' && data.adminPassword.length >= 4) {
+                    storedPassword = data.adminPassword;
+                    isPasswordLoaded = true;
+                    
+                    const localPass = localStorage.getItem('command_hub_password');
+                    if (localPass && localPass !== storedPassword) {
+                        if (isUnlocked) {
+                            setUnlocked(false);
+                        }
+                        localStorage.removeItem('command_hub_password');
+                    }
+                    
+                    showToast('✅ Паролата е заредена успешно от config.json!');
+                    setSyncStatus('online', 'Паролата заредена ✓');
+                    return true;
+                } else {
+                    throw new Error('Невалиден формат на паролата в config.json (изисква се минимум 4 символа)');
+                }
+            } catch (error) {
+                console.error('Грешка при зареждане на config.json:', error);
+                const localPass = localStorage.getItem('command_hub_password');
+                if (localPass) {
+                    storedPassword = localPass;
+                    isPasswordLoaded = true;
+                    showToast('⚠️ Използва се локално запаметена парола (config.json не е намерен)');
+                    setSyncStatus('offline', 'config.json липсва');
+                    return true;
+                } else {
+                    storedPassword = 'admin123';
+                    isPasswordLoaded = true;
+                    showToast('⚠️ Използва се стандартна парола! Създайте config.json файл.');
+                    setSyncStatus('offline', 'Стандартна парола');
+                    return false;
+                }
+            }
+        }
+
+        // ================================================================
+        // СМЯНА НА ПАРОЛАТА ВЪВ ФАЙЛ
+        // ================================================================
+        async function changePasswordInFile() {
+            if (!isUnlocked) {
+                showToast('⚠️ Трябва да сте отключили администраторския режим!');
+                return;
+            }
+            
+            const newPass = prompt('Въведи нова парола (минимум 4 символа):');
+            if (!newPass) return;
+            if (newPass.length < 4) {
+                showToast('❌ Паролата трябва да е поне 4 символа!');
+                return;
+            }
+            
+            try {
+                const configData = {
+                    adminPassword: newPass,
+                    version: '1.0',
+                    lastUpdated: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(configData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'config.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                storedPassword = newPass;
+                localStorage.setItem('command_hub_password', newPass);
+                if (isUnlocked) {
+                    setUnlocked(false);
+                }
+                showToast('✅ Паролата е сменена! Моля, запазете новия config.json файл в директорията.');
+            } catch (error) {
+                console.error('Грешка при смяна на паролата:', error);
+                showToast('❌ Грешка при смяна на паролата!');
+            }
+        }
+
+        // ================================================================
+        // ПРОВЕРКА НА ПАРОЛА
+        // ================================================================
+        function checkPassword(input) {
+            if (!isPasswordLoaded) {
+                showToast('⚠️ Паролата все още не е заредена!');
+                return false;
+            }
+            return input === storedPassword;
+        }
+
+        // ================================================================
+        // PAGINATION FUNCTIONS
+        // ================================================================
+        function getFilteredCommands() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const categoryFilterValue = categoryFilter.value;
+            const typeFilterValue = typeFilter.value;
+
+            return commands.filter(cmd => {
+                const matchSearch = cmd.name.toLowerCase().includes(searchTerm) ||
+                                    cmd.description.toLowerCase().includes(searchTerm) ||
+                                    cmd.category.toLowerCase().includes(searchTerm) ||
+                                    cmd.code.toLowerCase().includes(searchTerm);
+                const matchCategory = categoryFilterValue === 'all' || cmd.category === categoryFilterValue;
+                const matchType = typeFilterValue === 'all' || cmd.type === typeFilterValue;
+                return matchSearch && matchCategory && matchType;
+            });
+        }
+
+        function getPaginatedCommands() {
+            filteredCommands = getFilteredCommands();
+            const total = filteredCommands.length;
+            const totalPages = Math.ceil(total / itemsPerPage) || 1;
+            
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = Math.min(start + itemsPerPage, total);
+            
+            return {
+                items: filteredCommands.slice(start, end),
+                total: total,
+                start: total > 0 ? start + 1 : 0,
+                end: end,
+                currentPage: currentPage,
+                totalPages: totalPages
+            };
+        }
+
+        function renderPagination(paginationData) {
+            const { total, start, end, currentPage, totalPages } = paginationData;
+            
+            pageStart.textContent = start;
+            pageEnd.textContent = end;
+            totalCount.textContent = total;
+            
+            let buttonsHtml = '';
+            
+            buttonsHtml += `<button class="btn btn-outline page-btn" data-page="1" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left"></i></button>`;
+            buttonsHtml += `<button class="btn btn-outline page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-left"></i></button>`;
+            
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                buttonsHtml += `<button class="btn btn-outline page-btn" data-page="1">1</button>`;
+                if (startPage > 2) {
+                    buttonsHtml += `<span style="color:#6a7f99; padding:0 4px;">…</span>`;
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                buttonsHtml += `<button class="btn ${i === currentPage ? 'active' : 'btn-outline'} page-btn" data-page="${i}">${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    buttonsHtml += `<span style="color:#6a7f99; padding:0 4px;">…</span>`;
+                }
+                buttonsHtml += `<button class="btn btn-outline page-btn" data-page="${totalPages}">${totalPages}</button>`;
+            }
+            
+            buttonsHtml += `<button class="btn btn-outline page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-angle-right"></i></button>`;
+            buttonsHtml += `<button class="btn btn-outline page-btn" data-page="${totalPages}" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-angle-double-right"></i></button>`;
+            
+            paginationButtons.innerHTML = buttonsHtml;
+        }
+
+        // ================================================================
+        // PASSWORD MANAGEMENT
+        // ================================================================
+        function setUnlocked(state) {
+            isUnlocked = state;
+            if (state) {
+                adminStatus.textContent = '🔓 Отключено';
+                unlockText.textContent = 'Заключи';
+                adminBadge.className = 'badge admin-badge';
+                clearAllBtn.style.display = 'inline-flex';
+                deleteFromServerBtn.style.display = 'inline-flex';
+                adminConfigSection.style.display = 'block'; // Показваме секцията за администратори
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                });
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                });
+                showToast('✅ Отключено! Вече можеш да редактираш и изтриваш команди.');
+            } else {
+                adminStatus.textContent = '🔒 Защитено';
+                unlockText.textContent = 'Отключи';
+                adminBadge.className = 'badge admin-badge';
+                clearAllBtn.style.display = 'none';
+                deleteFromServerBtn.style.display = 'none';
+                adminConfigSection.style.display = 'none'; // Скриваме секцията за администратори
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                showToast('🔒 Заключено! Редактирането и изтриването са забранени.');
+            }
+        }
+
+        function showPasswordModal(action, id) {
+            if (!isPasswordLoaded) {
+                showToast('⚠️ Паролата не е заредена. Моля, презаредете страницата.');
+                return;
+            }
+            pendingAction = action;
+            pendingDeleteId = id || null;
+            if (action === 'edit') {
+                pendingEditId = id || null;
+            } else {
+                pendingEditId = null;
+            }
+            passwordInput.value = '';
+            passwordError.classList.remove('show');
+            
+            const labels = {
+                'delete': 'Изтриване на команда',
+                'edit': 'Редактиране на команда',
+                'clearAll': 'Изтриване на всички команди',
+                'deleteCategory': 'Изтриване на категория',
+                'unlock': 'Отключване на администраторски режим',
+                'deleteServer': 'Изтриване на всички данни от сървъра'
+            };
+            passwordAction.textContent = labels[action] || 'Потвърди действие';
+            passwordModal.classList.add('active');
+            setTimeout(() => passwordInput.focus(), 100);
+        }
+
+        function hidePasswordModal() {
+            passwordModal.classList.remove('active');
+            passwordInput.value = '';
+            passwordError.classList.remove('show');
+            pendingDeleteId = null;
+            pendingEditId = null;
+            pendingAction = null;
+        }
+
+        function handlePasswordConfirm() {
+            const input = passwordInput.value;
+            if (checkPassword(input)) {
+                hidePasswordModal();
+                if (pendingAction === 'unlock') {
+                    setUnlocked(true);
+                    return;
+                }
+                if (pendingAction === 'deleteServer') {
+                    executeDeleteFromServer();
+                    pendingAction = null;
+                    return;
+                }
+                setUnlocked(true);
+                if (pendingAction === 'delete' && pendingDeleteId !== null) {
+                    executeDelete(pendingDeleteId);
+                } else if (pendingAction === 'edit' && pendingEditId !== null) {
+                    executeEdit(pendingEditId);
+                } else if (pendingAction === 'clearAll') {
+                    executeClearAll();
+                } else if (pendingAction === 'deleteCategory') {
+                    executeDeleteCategory(pendingDeleteId);
+                }
+                pendingDeleteId = null;
+                pendingEditId = null;
+                pendingAction = null;
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+                setTimeout(() => {
+                    passwordError.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // ================================================================
+        // EXECUTE PROTECTED ACTIONS
+        // ================================================================
+        function executeDelete(id) {
+            if (!isUnlocked) {
+                showPasswordModal('delete', id);
+                return;
+            }
+            if (confirm('Сигурен ли си, че искаш да изтриеш тази команда?')) {
+                commands = commands.filter(c => c.id !== id);
+                saveToStorage();
+                showToast('🗑️ Изтрита.');
+                if (editingId === id) cancelEdit();
+            }
+        }
+
+        function executeEdit(id) {
+            if (!isUnlocked) {
+                showPasswordModal('edit', id);
+                return;
+            }
+            const cmd = commands.find(c => c.id === id);
+            if (!cmd) return;
+            editingId = id;
+            nameInput.value = cmd.name;
+            descInput.value = cmd.description;
+            codeInput.value = cmd.code;
+            categorySelect.value = cmd.category;
+            typeSelect.value = cmd.type || 'bash';
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-pen"></i> Обнови';
+            document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function executeClearAll() {
+            if (!isUnlocked) {
+                showPasswordModal('clearAll');
+                return;
+            }
+            if (commands.length === 0) return;
+            if (confirm('Изтриване на ВСИЧКИ команди. Сигурен ли си?')) {
+                commands = [];
+                saveToStorage();
+                cancelEdit();
+                showToast('🗑️ Всички команди са изтрити.');
+            }
+        }
+
+        function executeDeleteCategory(category) {
+            if (!isUnlocked) {
+                showPasswordModal('deleteCategory', category);
+                return;
+            }
+            const inUse = commands.some(cmd => cmd.category === category);
+            if (inUse) {
+                showToast('❌ Не може да изтриеш категория, която се използва от команди!');
+                return;
+            }
+            categories = categories.filter(c => c !== category);
+            saveToStorage();
+            renderCategoriesModal();
+            showToast('🗑️ Категорията е изтрита.');
+        }
+
+        async function executeDeleteFromServer() {
+            if (!isUnlocked) {
+                showPasswordModal('deleteServer');
+                return;
+            }
+            if (!API_URL) {
+                showToast('Worker не е конфигуриран.');
+                return;
+            }
+            if (!confirm('⚠️ СИГУРЕН ЛИ СИ? Това ще изтрие ВСИЧКИ данни от Cloudflare KV хранилището!')) {
+                return;
+            }
+            try {
+                setSyncStatus('', 'Изтриване...');
+                const response = await fetch(API_URL, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to delete');
+                setSyncStatus('', 'Изтрито от сървъра');
+                showToast('🗑️ Всички данни са изтрити от сървъра!');
+                await loadFromServer();
+            } catch(error) {
+                console.error('Delete error:', error);
+                setSyncStatus('offline', 'Грешка при изтриване');
+                showToast('❌ Грешка при изтриване на данните от сървъра!');
+            }
+        }
+
+        // ================================================================
+        // HELPERS
+        // ================================================================
+        function setSyncStatus(status, message) {
+            syncStatus.className = 'badge ' + status;
+            syncText.textContent = message;
+        }
+
+        function loadFromStorage() {
+            try {
+                const data = localStorage.getItem('command_hub_data');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    commands = parsed.commands || [];
+                    categories = parsed.categories || ['System', 'Network', 'Docker', 'Git', 'Package', 'Script', 'Other'];
+                } else {
+                    commands = [
+                        { id: Date.now() + 1, name: 'Update system', description: 'Обновява пакетите и системата', code: 'sudo apt update && sudo apt upgrade -y', category: 'System', type: 'bash' },
+                        { id: Date.now() + 2, name: 'Show disk usage', description: 'Показва използваното място по директории', code: 'df -h', category: 'System', type: 'bash' },
+                        { id: Date.now() + 3, name: 'Docker prune', description: 'Изчиства неизползвани Docker обекти', code: 'docker system prune -af', category: 'Docker', type: 'bash' },
+                        { id: Date.now() + 4, name: 'Get all services', description: 'Списък с всички услуги в Windows', code: 'Get-Service | Select-Object Name, Status', category: 'System', type: 'powershell' },
+                    ];
+                }
+            } catch(e) {
+                commands = [];
+                categories = ['System', 'Network', 'Docker', 'Git', 'Package', 'Script', 'Other'];
+            }
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            const data = {
+                commands: commands,
+                categories: categories
+            };
+            localStorage.setItem('command_hub_data', JSON.stringify(data));
+            updateCount();
+            render();
+            populateCategorySelects();
+        }
+
+        function updateCount() {
+            countDisplay.textContent = commands.length;
+        }
+
+        function populateCategorySelects() {
+            const currentVal = categorySelect.value;
+            categorySelect.innerHTML = '';
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categorySelect.appendChild(opt);
+            });
+            if (categories.includes(currentVal)) {
+                categorySelect.value = currentVal;
+            }
+
+            const filterVal = categoryFilter.value;
+            categoryFilter.innerHTML = '<option value="all">Всички категории</option>';
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categoryFilter.appendChild(opt);
+            });
+            if (categories.includes(filterVal) || filterVal === 'all') {
+                categoryFilter.value = filterVal;
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // ================================================================
+        // API CALLS
+        // ================================================================
+        async function loadFromServer() {
+            if (!API_URL) {
+                showToast('Worker не е конфигуриран. Работи в локален режим.');
+                return;
+            }
+            try {
+                setSyncStatus('', 'Зареждане...');
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Failed to load');
+                const data = await response.json();
+                
+                if (data.commands && Array.isArray(data.commands)) {
+                    commands = data.commands;
+                    categories = data.categories || ['System', 'Network', 'Docker', 'Git', 'Package', 'Script', 'Other'];
+                    saveToStorage();
+                    setSyncStatus('online', 'Синхронизирано ✓');
+                    showToast('Заредени данни от сървъра!');
+                } else {
+                    throw new Error('Invalid data format');
+                }
+            } catch(error) {
+                console.error('Load error:', error);
+                setSyncStatus('offline', 'Грешка при зареждане');
+                showToast('Грешка при зареждане от сървъра!');
+            }
+        }
+
+        async function saveToServer() {
+            if (!API_URL) {
+                showToast('Worker не е конфигуриран. Работи в локален режим.');
+                return;
+            }
+            try {
+                setSyncStatus('', 'Качване...');
+                const data = {
+                    commands: commands,
+                    categories: categories
+                };
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Failed to save');
+                setSyncStatus('online', 'Синхронизирано ✓');
+                showToast('Данните са качени на сървъра!');
+            } catch(error) {
+                console.error('Save error:', error);
+                setSyncStatus('offline', 'Грешка при качване');
+                showToast('Грешка при качване на сървъра!');
+            }
+        }
+
+        async function syncWithServer() {
+            if (!API_URL) {
+                showToast('Worker не е конфигуриран. Работи в локален режим.');
+                return;
+            }
+            if (isSyncing) return;
+            isSyncing = true;
+            syncBtn.disabled = true;
+            
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Failed to load');
+                const serverData = await response.json();
+                
+                if (serverData.commands && Array.isArray(serverData.commands)) {
+                    if (serverData.commands.length > 0) {
+                        const choice = confirm(
+                            `На сървъра има ${serverData.commands.length} команди.\n` +
+                            `Локално имаш ${commands.length} команди.\n\n` +
+                            `Натисни "OK" за да замениш локалните с тези от сървъра.\n` +
+                            `Натисни "Cancel" за да качиш локалните на сървъра.`
+                        );
+                        
+                        if (choice) {
+                            commands = serverData.commands;
+                            categories = serverData.categories || ['System', 'Network', 'Docker', 'Git', 'Package', 'Script', 'Other'];
+                            saveToStorage();
+                            setSyncStatus('online', 'Синхронизирано ✓');
+                            showToast(`Заредени ${commands.length} команди от сървъра!`);
+                        } else {
+                            await saveToServer();
+                        }
+                    } else {
+                        await saveToServer();
+                    }
+                } else {
+                    await saveToServer();
+                }
+            } catch(error) {
+                console.error('Sync error:', error);
+                setSyncStatus('offline', 'Грешка при синхронизация');
+                showToast('Грешка при синхронизация!');
+            }
+            
+            isSyncing = false;
+            syncBtn.disabled = false;
+        }
+
+        // ================================================================
+        // RENDER
+        // ================================================================
+        function render() {
+            const paginationData = getPaginatedCommands();
+            const items = paginationData.items;
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-terminal"></i>
+                        <p>${commands.length === 0 ? 'Все още нямаш добавени команди. Добави първата!' : 'Няма команди, отговарящи на филтъра.'}</p>
+                    </div>
+                `;
+                renderPagination(paginationData);
+                setTimeout(attachPaginationEvents, 50);
+                return;
+            }
+
+            let html = '';
+            items.forEach(cmd => {
+                const isPwsh = cmd.type === 'powershell';
+                const pwshClass = isPwsh ? 'powershell' : '';
+                const typeLabel = isPwsh ? 'PowerShell' : 'Bash';
+                const typeBadgeClass = isPwsh ? 'pwsh' : '';
+                const icon = isPwsh ? '🪟' : '🐧';
+                const editDisplay = isUnlocked ? 'inline-flex' : 'none';
+                const deleteDisplay = isUnlocked ? 'inline-flex' : 'none';
+                
+                html += `
+                    <div class="command-item ${pwshClass}" data-id="${cmd.id}">
+                        <div class="command-info">
+                            <div class="cmd-name">
+                                ${escapeHtml(cmd.name)}
+                                <span class="category-tag"><i class="fas fa-tag"></i> ${escapeHtml(cmd.category)}</span>
+                                <span class="type-badge ${typeBadgeClass}">${icon} ${typeLabel}</span>
+                            </div>
+                            <div class="cmd-desc">${escapeHtml(cmd.description)}</div>
+                        </div>
+                        <div class="command-code">
+                            <code>${escapeHtml(cmd.code)}</code>
+                            <button class="copy-btn" data-cmd="${escapeHtml(cmd.code)}" title="Копирай командата"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="command-actions">
+                            <button class="edit-btn" data-id="${cmd.id}" title="Редактирай" style="display:${editDisplay};"><i class="fas fa-pen"></i></button>
+                            <button class="delete-btn" data-id="${cmd.id}" title="Изтрий" style="display:${deleteDisplay};">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const code = this.getAttribute('data-cmd');
+                    copyToClipboard(code);
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    executeDelete(id);
+                });
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    executeEdit(id);
+                });
+            });
+            
+            renderPagination(paginationData);
+            setTimeout(attachPaginationEvents, 50);
+        }
+
+        // ================================================================
+        // ATTACH PAGINATION EVENTS
+        // ================================================================
+        function attachPaginationEvents() {
+            document.querySelectorAll('#paginationButtons .page-btn').forEach(btn => {
+                btn.removeEventListener('click', handlePageClick);
+                btn.addEventListener('click', handlePageClick);
+            });
+        }
+
+        function handlePageClick(e) {
+            e.preventDefault();
+            const page = parseInt(this.getAttribute('data-page'));
+            const totalPages = Math.ceil(getFilteredCommands().length / itemsPerPage) || 1;
+            
+            if (!isNaN(page) && page !== currentPage && page >= 1 && page <= totalPages) {
+                currentPage = page;
+                render();
+                const commandsGrid = document.querySelector('.commands-grid');
+                if (commandsGrid) {
+                    commandsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        // ================================================================
+        // CRUD
+        // ================================================================
+        function addCommand(name, description, code, category, type) {
+            const newCmd = {
+                id: Date.now(),
+                name: name.trim(),
+                description: description.trim(),
+                code: code.trim(),
+                category: category,
+                type: type || 'bash'
+            };
+            commands.push(newCmd);
+            saveToStorage();
+            showToast('✅ Командата е добавена!');
+        }
+
+        function updateCommand(id, name, description, code, category, type) {
+            const index = commands.findIndex(c => c.id === id);
+            if (index !== -1) {
+                commands[index] = { id, name: name.trim(), description: description.trim(), code: code.trim(), category, type: type || 'bash' };
+                saveToStorage();
+                showToast('✅ Командата е обновена!');
+            }
+        }
+
+        // ================================================================
+        // CATEGORY MANAGEMENT
+        // ================================================================
+        function addCategory(category) {
+            category = category.trim();
+            if (!category) return false;
+            if (categories.includes(category)) {
+                showToast('❌ Тази категория вече съществува!');
+                return false;
+            }
+            categories.push(category);
+            saveToStorage();
+            renderCategoriesModal();
+            showToast('✅ Категорията е добавена!');
+            return true;
+        }
+
+        function removeCategory(category) {
+            if (isUnlocked) {
+                const inUse = commands.some(cmd => cmd.category === category);
+                if (inUse) {
+                    showToast('❌ Не може да изтриеш категория, която се използва от команди!');
+                    return;
+                }
+                categories = categories.filter(c => c !== category);
+                saveToStorage();
+                renderCategoriesModal();
+                showToast('🗑️ Категорията е изтрита.');
+            } else {
+                showPasswordModal('deleteCategory', category);
+            }
+        }
+
+        function resetDefaultCategories() {
+            const defaultCats = ['System', 'Network', 'Docker', 'Git', 'Package', 'Script', 'Other'];
+            let added = 0;
+            defaultCats.forEach(cat => {
+                if (!categories.includes(cat)) {
+                    categories.push(cat);
+                    added++;
+                }
+            });
+            if (added > 0) {
+                saveToStorage();
+                renderCategoriesModal();
+                showToast(`✅ Добавени ${added} стандартни категории.`);
+            } else {
+                showToast('ℹ️ Всички стандартни категории вече съществуват.');
+            }
+        }
+
+        function renderCategoriesModal() {
+            categoriesList.innerHTML = '';
+            categories.forEach(cat => {
+                const pill = document.createElement('span');
+                pill.className = 'category-pill';
+                pill.innerHTML = `
+                    ${escapeHtml(cat)}
+                    <button class="remove-cat" data-category="${escapeHtml(cat)}"><i class="fas fa-times-circle"></i></button>
+                `;
+                categoriesList.appendChild(pill);
+            });
+
+            document.querySelectorAll('.remove-cat').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const cat = this.getAttribute('data-category');
+                    removeCategory(cat);
+                });
+            });
+        }
+
+        // ================================================================
+        // EDIT MODE
+        // ================================================================
+        function startEdit(id) {
+            executeEdit(id);
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            form.reset();
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Запази';
+            typeSelect.value = 'bash';
+        }
+
+        // ================================================================
+        // FORM HANDLER
+        // ================================================================
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = nameInput.value.trim();
+            const desc = descInput.value.trim();
+            const code = codeInput.value.trim();
+            const category = categorySelect.value;
+            const type = typeSelect.value;
+
+            if (!name || !code) {
+                showToast('❌ Моля, попълни име и команда!');
+                return;
+            }
+
+            if (editingId !== null) {
+                updateCommand(editingId, name, desc, code, category, type);
+                cancelEdit();
+            } else {
+                addCommand(name, desc, code, category, type);
+                form.reset();
+                typeSelect.value = 'bash';
+            }
+        });
+
+        form.querySelector('button[type="reset"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (editingId !== null) {
+                if (confirm('Отказваш ли редактирането?')) {
+                    cancelEdit();
+                }
+            } else {
+                form.reset();
+                typeSelect.value = 'bash';
+            }
+        });
+
+        // ================================================================
+        // SEARCH & FILTER
+        // ================================================================
+        searchInput.addEventListener('input', function() {
+            currentPage = 1;
+            render();
+        });
+        categoryFilter.addEventListener('change', function() {
+            currentPage = 1;
+            render();
+        });
+        typeFilter.addEventListener('change', function() {
+            currentPage = 1;
+            render();
+        });
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            categoryFilter.value = 'all';
+            typeFilter.value = 'all';
+            currentPage = 1;
+            render();
+        });
+
+        // ================================================================
+        // ITEMS PER PAGE
+        // ================================================================
+        itemsPerPageSelect.addEventListener('change', function() {
+            itemsPerPage = parseInt(this.value);
+            currentPage = 1;
+            render();
+        });
+
+        // ================================================================
+        // FILE OPERATIONS
+        // ================================================================
+        function exportToFile() {
+            const data = {
+                version: '1.0',
+                exportedAt: new Date().toISOString(),
+                categories: categories,
+                commands: commands
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `commands_backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ Експортирано успешно!');
+        }
+
+        function importFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.commands || !Array.isArray(data.commands)) {
+                        showToast('❌ Невалиден файл!');
+                        return;
+                    }
+                    const validCommands = data.commands.filter(c => c.name && c.code && c.category);
+                    if (validCommands.length === 0) {
+                        showToast('❌ Няма валидни команди във файла!');
+                        return;
+                    }
+                    
+                    if (confirm(`Намерени ${validCommands.length} команди. Искаш ли да ги добавиш към съществуващите? (Натисни "Отказ" за презаписване)`)) {
+                        commands = commands.concat(validCommands);
+                    } else {
+                        commands = validCommands;
+                    }
+
+                    if (data.categories && Array.isArray(data.categories)) {
+                        data.categories.forEach(cat => {
+                            if (!categories.includes(cat)) {
+                                categories.push(cat);
+                            }
+                        });
+                    }
+
+                    currentPage = 1;
+                    saveToStorage();
+                    showToast(`✅ Импортирани ${validCommands.length} команди!`);
+                } catch(err) {
+                    showToast('❌ Грешка при четене на файла!');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ================================================================
+        // CATEGORIES MODAL
+        // ================================================================
+        function toggleCategoriesModal(show) {
+            if (show) {
+                renderCategoriesModal();
+                categoriesModal.classList.add('active');
+            } else {
+                categoriesModal.classList.remove('active');
+            }
+        }
+
+        manageCategoriesBtn.addEventListener('click', () => toggleCategoriesModal(true));
+        closeModalBtn.addEventListener('click', () => toggleCategoriesModal(false));
+        categoriesModal.addEventListener('click', function(e) {
+            if (e.target === this) toggleCategoriesModal(false);
+        });
+
+        addCategoryBtn.addEventListener('click', function() {
+            const val = newCategoryInput.value.trim();
+            if (addCategory(val)) {
+                newCategoryInput.value = '';
+            }
+        });
+
+        newCategoryInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCategoryBtn.click();
+            }
+        });
+
+        resetDefaultCategoriesBtn.addEventListener('click', resetDefaultCategories);
+
+        // ================================================================
+        // PASSWORD MODAL EVENTS
+        // ================================================================
+        passwordConfirmBtn.addEventListener('click', handlePasswordConfirm);
+        passwordCancelBtn.addEventListener('click', hidePasswordModal);
+        
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handlePasswordConfirm();
+            }
+        });
+
+        passwordModal.addEventListener('click', function(e) {
+            if (e.target === this) hidePasswordModal();
+        });
+
+        changePasswordBtn.addEventListener('click', changePasswordInFile);
+
+        // ================================================================
+        // UNLOCK / LOCK
+        // ================================================================
+        unlockBtn.addEventListener('click', function() {
+            if (isUnlocked) {
+                setUnlocked(false);
+            } else {
+                showPasswordModal('unlock');
+            }
+        });
+
+        // ================================================================
+        // CLEAR ALL
+        // ================================================================
+        clearAllBtn.addEventListener('click', function() {
+            executeClearAll();
+        });
+
+        // ================================================================
+        // DELETE FROM SERVER
+        // ================================================================
+        deleteFromServerBtn.addEventListener('click', function() {
+            executeDeleteFromServer();
+        });
+
+        // ================================================================
+        // RELOAD CONFIG - САМО ЗА АДМИНИСТРАТОРИ
+        // ================================================================
+        reloadConfigBtn.addEventListener('click', function() {
+            if (!isUnlocked) {
+                showToast('⚠️ Трябва да сте отключили администраторския режим!');
+                return;
+            }
+            loadPasswordFromFile().then(success => {
+                if (success) {
+                    showToast('✅ Паролата е презаредена успешно!');
+                } else {
+                    showToast('⚠️ Паролата не може да бъде заредена. Проверете config.json');
+                }
+            });
+        });
+
+        // ================================================================
+        // CLIPBOARD
+        // ================================================================
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('📋 Копирано в клипборда!');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('📋 Копирано!');
+            } catch (e) {
+                showToast('❌ Грешка при копиране.');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ================================================================
+        // TOAST
+        // ================================================================
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ================================================================
+        // EVENT LISTENERS
+        // ================================================================
+        exportBtn.addEventListener('click', exportToFile);
+        importBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                importFromFile(this.files[0]);
+                this.value = '';
+            }
+        });
+
+        syncBtn.addEventListener('click', syncWithServer);
+        syncToServerBtn.addEventListener('click', saveToServer);
+        loadFromServerBtn.addEventListener('click', loadFromServer);
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        async function init() {
+            await loadPasswordFromFile();
+            
+            loadFromStorage();
+            populateCategorySelects();
+            render();
+            setUnlocked(false);
+            
+            if (API_URL) {
+                setSyncStatus('', 'Не е синхронизирано');
+                setTimeout(() => {
+                    loadFromServer();
+                }, 1500);
+            } else {
+                setSyncStatus('', 'Локален режим');
+                syncBtn.style.display = 'none';
+                syncToServerBtn.style.display = 'none';
+                loadFromServerBtn.style.display = 'none';
+                deleteFromServerBtn.style.display = 'none';
+            }
+        }
+
+        init();
+
+        // Storage change listener
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'command_hub_data') {
+                loadFromStorage();
+                populateCategorySelects();
+                render();
+                if (editingId !== null) cancelEdit();
+            }
+        });
+
+        // Auto-lock after 30 minutes
+        let inactivityTimer = null;
+        function resetInactivityTimer() {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (isUnlocked) {
+                    setUnlocked(false);
+                    showToast('🔒 Автоматично заключване след 30 минути бездействие.');
+                }
+            }, 30 * 60 * 1000);
+        }
+
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('keydown', resetInactivityTimer);
+        document.addEventListener('mousemove', resetInactivityTimer);
+        resetInactivityTimer();
+
+    })();
+</script>
+</body>
+</html>

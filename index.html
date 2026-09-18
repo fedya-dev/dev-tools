@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dev Tools Pro — Транслитерация, пароли, Markdown и още</title>
+<meta name="description" content="Професионални безплатни инструменти за разработчици: транслитерация Кирилица→Латиница, генератор на пароли, emoji library, Markdown редактор, цветови пикер, UUID, Base64, SHA-256 и още. Всичко работи локално в браузъра.">
+<meta name="keywords" content="транслитерация, кирилица латиница, url slug, генератор на пароли, markdown editor, color picker, dev tools, docker emoji, proxmox, wordpress tools">
+<meta name="author" content="Dev Tools Pro">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#2563eb">
+<meta name="color-scheme" content="light dark">
+
+<!-- Open Graph / Social -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dev Tools Pro — Професионални инструменти">
+<meta property="og:description" content="Транслитерация, генератор на пароли, Markdown, emoji library и още полезни инструменти за работа. 100% локално в браузъра.">
+<meta property="og:locale" content="bg_BG">
+<meta property="og:site_name" content="Dev Tools Pro">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dev Tools Pro">
+<meta name="twitter:description" content="Професионални Dev Tools: транслитерация, пароли, Markdown и още.">
+
+<!-- Humans.txt + Favicon -->
+<link type="text/plain" rel="author" href="/humans.txt">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛠️%3C/text%3E%3C/svg%3E">
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Dev Tools Pro",
+  "description": "Професионални безплатни инструменти за разработчици: транслитерация Кирилица→Латиница, генератор на пароли, emoji library, Markdown редактор, цветови пикер, UUID, Base64, SHA-256 и още. Всичко работи локално в браузъра.",
+  "url": "https://YOURDOMAIN.com/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "featureList": [
+    "Транслитерация Кирилица → Латиница",
+    "Генератор на пароли",
+    "Emoji Library",
+    "Markdown редактор",
+    "Моите линкове (bookmarks)",
+    "URL Декодер за .htaccess",
+    "YouTube → MP3 (yt-dlp генератор)",
+    "Цветови пикер",
+    "UUID Generator",
+    "Base64 Encode/Decode",
+    "SHA-256 Hash",
+    "Timestamp Converter",
+    "JSON Formatter"
+  ],
+  "inLanguage": "bg",
+  "isAccessibleForFree": true
+}
+</script>
+<style>
+:root{--bg:#f4f6f9;--bg-card:#fff;--text:#1a1d23;--text-muted:#5c6570;--primary:#2563eb;--primary-hover:#1d4ed8;--border:#e2e8f0;--success:#059669;--danger:#dc2626;--radius:12px;--shadow:0 4px 20px rgba(0,0,0,.06);--input-bg:#f8fafc}
+[data-theme=dark]{--bg:#0f1117;--bg-card:#1a1d27;--text:#e8eaed;--text-muted:#9ca3af;--primary:#3b82f6;--primary-hover:#60a5fa;--border:#2d3340;--success:#10b981;--danger:#f87171;--shadow:0 4px 24px rgba(0,0,0,.35);--input-bg:#12151c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;transition:background .25s,color .25s}
+header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.25rem}
+.logo span{color:var(--primary)}
+.theme-btn{background:var(--input-bg);border:1px solid var(--border);border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.theme-btn:hover{transform:scale(1.08);border-color:var(--primary)}
+.ext-link{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .9rem;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);text-decoration:none;font-size:.85rem;font-weight:500;transition:all .15s}
+.ext-link:hover{border-color:var(--primary);color:var(--primary)}
+.container{max-width:1200px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:220px 1fr;gap:1.5rem}
+@media(max-width:800px){.container{grid-template-columns:1fr}nav{position:relative!important;top:0!important}}
+nav{background:var(--bg-card);border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);height:fit-content;position:sticky;top:80px}
+nav button{display:block;width:100%;text-align:left;padding:.7rem 1rem;margin-bottom:.3rem;border:none;background:0 0;color:var(--text);border-radius:8px;cursor:pointer;font-size:.95rem;transition:all .15s}
+nav button:hover{background:var(--input-bg)}
+nav button.active{background:var(--primary);color:#fff;font-weight:600}
+nav a.nav-ext{display:block;width:100%;text-align:left;padding:.7rem 1rem;margin-bottom:.3rem;border:none;background:0 0;color:var(--text);border-radius:8px;cursor:pointer;font-size:.95rem;text-decoration:none;transition:all .15s}
+nav a.nav-ext:hover{background:var(--input-bg);color:var(--primary)}
+main{background:var(--bg-card);border-radius:var(--radius);padding:1.75rem;box-shadow:var(--shadow);min-height:520px}
+.tool{display:none}.tool.active{display:block;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:1.4rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.desc{color:var(--text-muted);font-size:.9rem;margin-bottom:1.4rem}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.35rem;color:var(--text-muted)}
+textarea,input[type=text],input[type=number],input[type=color],select{width:100%;padding:.75rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:.95rem;font-family:inherit;transition:border .2s}
+textarea:focus,input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.row>*{flex:1;min-width:140px}
+.btn{background:var(--primary);color:#fff;border:none;padding:.7rem 1.3rem;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;display:inline-flex;align-items:center;gap:.4rem}
+.btn:hover{background:var(--primary-hover)}.btn:active{transform:scale(.97)}
+.btn-secondary{background:0 0;border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-group{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem}
+.result-box{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:1rem;font-family:'Cascadia Code','Fira Code',monospace;word-break:break-all;position:relative}
+.emoji-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.7rem}
+.emoji-item{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:.8rem .4rem;text-align:center;cursor:pointer;transition:all .15s;user-select:none}
+.emoji-item:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.emoji-item .e{font-size:1.8rem;display:block;margin-bottom:.3rem}
+.emoji-item .n{font-size:.72rem;color:var(--text-muted)}
+.search-box{margin-bottom:1.2rem}
+.options{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0}
+.checkbox{display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.9rem}
+.checkbox input{width:18px;height:18px;accent-color:var(--primary)}
+.strength{height:6px;border-radius:3px;margin-top:.6rem;background:var(--border);overflow:hidden}
+.strength-bar{height:100%;width:0;transition:width .3s,background .3s}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--success);color:#fff;padding:.8rem 1.3rem;border-radius:8px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;transform:translateY(20px);transition:all .3s;z-index:999}
+.toast.show{opacity:1;transform:none}
+footer{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.85rem}
+/* Color picker */
+.color-preview{width:100%;height:120px;border-radius:10px;border:1px solid var(--border);margin-bottom:1rem;transition:background .15s}
+.color-values{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem}
+.color-values .val{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:.7rem;cursor:pointer;text-align:center;font-family:monospace;font-size:.9rem;transition:border .15s}
+.color-values .val:hover{border-color:var(--primary)}
+.color-values .val span{display:block;font-size:.75rem;color:var(--text-muted);font-family:inherit;margin-bottom:.2rem}
+/* Markdown */
+.md-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-height:420px}
+@media(max-width:700px){.md-wrap{grid-template-columns:1fr}}
+.md-editor,.md-preview{border:1px solid var(--border);border-radius:8px;background:var(--input-bg);overflow:auto}
+.md-editor{padding:0}
+.md-editor textarea{border:none;border-radius:8px;min-height:420px;height:100%;resize:none;padding:1rem;background:transparent}
+.md-preview{padding:1rem 1.2rem;line-height:1.65}
+.md-preview h1,.md-preview h2,.md-preview h3{margin:1rem 0 .5rem;line-height:1.3}
+.md-preview h1{font-size:1.6rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.md-preview h2{font-size:1.3rem}.md-preview h3{font-size:1.1rem}
+.md-preview p{margin:.6rem 0}
+.md-preview ul,.md-preview ol{margin:.6rem 0 .6rem 1.4rem}
+.md-preview code{background:var(--border);padding:.15rem .4rem;border-radius:4px;font-size:.88em;font-family:monospace}
+.md-preview pre{background:var(--border);padding:.9rem;border-radius:8px;overflow-x:auto;margin:.8rem 0}
+.md-preview pre code{background:0 0;padding:0}
+.md-preview blockquote{border-left:4px solid var(--primary);margin:.8rem 0;padding:.4rem 1rem;color:var(--text-muted)}
+.md-preview table{border-collapse:collapse;width:100%;margin:.8rem 0}
+.md-preview th,.md-preview td{border:1px solid var(--border);padding:.45rem .7rem;text-align:left}
+.md-preview th{background:var(--border)}
+.md-preview a{color:var(--primary)}
+.md-preview img{max-width:100%;border-radius:6px}
+.md-preview hr{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
+.md-toolbar{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem}
+.md-toolbar button{background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:.35rem .65rem;cursor:pointer;font-size:.85rem;color:var(--text);transition:all .15s}
+.md-toolbar button:hover{border-color:var(--primary);color:var(--primary)}
+/* Links */
+.links-list{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem}
+.link-item{display:flex;align-items:center;gap:.8rem;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;transition:border .15s}
+.link-item:hover{border-color:var(--primary)}
+.link-item .link-info{flex:1;min-width:0}
+.link-item .link-title{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link-item .link-url{font-size:.8rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link-item .link-actions{display:flex;gap:.4rem;flex-shrink:0}
+.link-item .link-actions button{background:0 0;border:1px solid var(--border);border-radius:6px;padding:.3rem .55rem;cursor:pointer;font-size:.8rem;color:var(--text);transition:all .15s}
+.link-item .link-actions button:hover{border-color:var(--primary);color:var(--primary)}
+.link-item .link-actions button.del:hover{border-color:var(--danger);color:var(--danger)}
+.links-empty{text-align:center;color:var(--text-muted);padding:2rem 1rem;font-size:.95rem}
+.links-pager{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:1.2rem;flex-wrap:wrap}
+.links-pager button{background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:.4rem .7rem;cursor:pointer;font-size:.85rem;color:var(--text);min-width:36px;transition:all .15s}
+.links-pager button:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.links-pager button.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+.links-pager button:disabled{opacity:.4;cursor:default}
+.links-pager .pager-info{font-size:.85rem;color:var(--text-muted);margin:0 .5rem}
+.info-box{background:var(--input-bg);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:8px;padding:1rem 1.2rem;font-size:.9rem}
+.ht-list{display:flex;flex-direction:column;gap:.5rem}
+.ht-item{display:flex;align-items:flex-start;gap:.6rem;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;font-family:monospace;font-size:.82rem;word-break:break-all}
+.ht-item code{flex:1;color:var(--text)}
+.ht-item button{flex-shrink:0;background:0 0;border:1px solid var(--border);border-radius:6px;padding:.25rem .5rem;cursor:pointer;font-size:.75rem;color:var(--text)}
+.ht-item button:hover{border-color:var(--danger);color:var(--danger)}
+.ht-empty{text-align:center;color:var(--text-muted);padding:1rem;font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">🛠️ <span>Dev Tools</span> Pro</div>
+<div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+<a href="https://fedia.eu/" target="_blank" rel="noopener" class="ext-link" title="Към fedia.eu">🌐 Към fedia.eu</a>
+<a href="/encrypt.html" target="_blank" rel="noopener" class="ext-link" title="Към fedia.eu">🔐 Към File Encryptor</a>
+
+<a href="commandhub.html" class="ext-link" title="CommandHub — Ubuntu & PowerShell команди">🐧 CommandHub</a>
+
+<button class="theme-btn" id="themeBtn" title="Смени тема" aria-label="Тема">🌙</button>
+</div>
+</header>
+<div class="container">
+<nav id="nav">
+<button class="active" data-tool="translit">🔤 Транслитерация</button>
+<button data-tool="emoji">😀 Emoji Library</button>
+<button data-tool="password">🔑 Генератор на пароли</button>
+<button data-tool="color">🎨 Цветови пикер</button>
+<button data-tool="markdown">📝 Markdown</button>
+<button data-tool="links">🔗 Моите линкове</button>
+<button data-tool="htaccess">🔀 URL → .htaccess</button>
+<button data-tool="ytdlp">🎵 YouTube → MP3</button>
+<button data-tool="uuid">🆔 UUID Generator</button>
+<button data-tool="base64">📦 Base64</button>
+<button data-tool="hash">#️⃣ Hash (SHA-256)</button>
+<button data-tool="timestamp">⏰ Timestamp</button>
+<button data-tool="json">🧩 JSON Formatter</button>
+<button data-tool="lorem">📄 Lorem Ipsum</button>
+<hr style="border:none;border-top:1px solid var(--border);margin:.6rem 0">
+
+</nav>
+<main>
+<!-- Translit -->
+<div class="tool active" id="translit">
+<h2>🔤 Транслитерация</h2>
+<p class="desc">Кирилица → Латиница (официална българска система) — за URL slug, имена на файлове и SEO.</p>
+<label>Въведи текст на кирилица</label>
+<textarea id="cyrInput" placeholder="Пример: Здравей свят, това е тестов URL slug..."></textarea>
+<div class="row" style="margin-top:1rem">
+<div><label>Разделител</label><select id="slugSep"><option value="-">тире (-)</option><option value="_">долна черта (_)</option><option value="">без разделител</option></select></div>
+<div><label>Опции</label><div class="checkbox" style="margin-top:.5rem"><input type="checkbox" id="toLower" checked> <span>малки букви</span></div></div>
+</div>
+<div class="btn-group">
+<button class="btn" onclick="doTranslit()">Конвертирай</button>
+<button class="btn btn-secondary" onclick="copyResult('translitResult')">Копирай</button>
+<button class="btn btn-secondary" onclick="clearTranslit()">Изчисти</button>
+</div>
+<div class="result-box" id="translitResult" style="min-height:60px">Резултатът ще се появи тук...</div>
+</div>
+<!-- Emoji -->
+<div class="tool" id="emoji">
+<h2>😀 Emoji Library</h2>
+<p class="desc">Колекция за професионална работа — Docker, WordPress, Proxmox, бази данни и още.</p>
+<div class="search-box"><input type="text" id="emojiSearch" placeholder="Търси (docker, database, server...)" oninput="filterEmojis()"></div>
+<div class="emoji-grid" id="emojiGrid"></div>
+</div>
+<!-- Password -->
+<div class="tool" id="password">
+<h2>🔑 Генератор на пароли</h2>
+<p class="desc">Сигурни пароли с пълен контрол.</p>
+<div class="row"><div><label>Дължина: <span id="lenVal">16</span></label><input type="range" id="passLen" min="8" max="64" value="16" oninput="document.getElementById('lenVal').textContent=this.value"></div></div>
+<div class="options">
+<label class="checkbox"><input type="checkbox" id="upper" checked> Главни (A-Z)</label>
+<label class="checkbox"><input type="checkbox" id="lower" checked> Малки (a-z)</label>
+<label class="checkbox"><input type="checkbox" id="numbers" checked> Цифри (0-9)</label>
+<label class="checkbox"><input type="checkbox" id="symbols" checked> Символи (!@#$...)</label>
+<label class="checkbox"><input type="checkbox" id="excludeAmbiguous"> Без объркващи (0OIl1)</label>
+</div>
+<div class="btn-group">
+<button class="btn" onclick="generatePassword()">Генерирай</button>
+<button class="btn btn-secondary" onclick="copyResult('passResult')">Копирай</button>
+</div>
+<div class="result-box" id="passResult" style="font-size:1.15rem;letter-spacing:1px;min-height:50px">—</div>
+<div class="strength"><div class="strength-bar" id="strengthBar"></div></div>
+<p id="strengthText" style="font-size:.85rem;color:var(--text-muted);margin-top:.4rem"></p>
+</div>
+<!-- Color Picker -->
+<div class="tool" id="color">
+<h2>🎨 Цветови пикер</h2>
+<p class="desc">Избери цвят и копирай в HEX, RGB или HSL.</p>
+<div class="color-preview" id="colorPreview" style="background:#2563eb"></div>
+<div class="row">
+<div><label>Избери цвят</label><input type="color" id="colorInput" value="#2563eb" oninput="updateColor(this.value)"></div>
+<div><label>Или HEX</label><input type="text" id="hexManual" value="#2563eb" oninput="manualHex(this.value)" placeholder="#2563eb"></div>
+</div>
+<div class="color-values" id="colorValues">
+<div class="val" onclick="copyText(this.dataset.v)" data-v="#2563eb"><span>HEX</span>#2563eb</div>
+<div class="val" onclick="copyText(this.dataset.v)" data-v="rgb(37, 99, 235)"><span>RGB</span>rgb(37, 99, 235)</div>
+<div class="val" onclick="copyText(this.dataset.v)" data-v="hsl(221, 83%, 53%)"><span>HSL</span>hsl(221, 83%, 53%)</div>
+</div>
+</div>
+<!-- Markdown -->
+<div class="tool" id="markdown">
+<h2>📝 Markdown редактор</h2>
+<p class="desc">Пиши бележки с пълна Markdown поддръжка — live preview.</p>
+<div class="md-toolbar">
+<button type="button" onclick="mdInsert('**','**')" title="Bold">B</button>
+<button type="button" onclick="mdInsert('*','*')" title="Italic"><i>I</i></button>
+<button type="button" onclick="mdInsert('~~','~~')" title="Strikethrough">S</button>
+<button type="button" onclick="mdInsert('`','`')" title="Code">&lt;/&gt;</button>
+<button type="button" onclick="mdInsert('\n```\n','\n```\n')" title="Code block">{ }</button>
+<button type="button" onclick="mdInsert('[','](url)')" title="Link">🔗</button>
+<button type="button" onclick="mdInsert('\n- ','')" title="List">• List</button>
+<button type="button" onclick="mdInsert('\n1. ','')" title="Ordered">1. List</button>
+<button type="button" onclick="mdInsert('\n> ','')" title="Quote">❝</button>
+<button type="button" onclick="mdInsert('\n---\n','')" title="HR">―</button>
+<button type="button" onclick="mdInsert('\n|  |  |\n|---|---|\n|  |  |\n','')" title="Table">⊞</button>
+<button type="button" class="btn-secondary" onclick="copyResult('mdSource')" style="margin-left:auto">Копирай MD</button>
+</div>
+<div class="md-wrap">
+<div class="md-editor"><textarea id="mdInput" placeholder="# Заглавие&#10;&#10;Пиши Markdown тук...&#10;&#10;- списък&#10;- **удебелен**&#10;- `код`" oninput="renderMD()"></textarea></div>
+<div class="md-preview" id="mdPreview"><p style="color:var(--text-muted)">Прегледът ще се появи тук...</p></div>
+</div>
+<textarea id="mdSource" style="position:absolute;left:-9999px" aria-hidden="true"></textarea>
+</div>
+<!-- Links / Bookmarks -->
+<div class="tool" id="links">
+<h2>🔗 Моите линкове</h2>
+<p class="desc">Запази най-използваните си линкове. Данните се пазят локално в браузъра (localStorage).</p>
+<div class="row">
+<div>
+<label>Заглавие</label>
+<input type="text" id="linkTitle" placeholder="Напр. Proxmox, GitHub, Документация..." onkeydown="if(event.key==='Enter')document.getElementById('linkUrl').focus()">
+</div>
+<div>
+<label>URL</label>
+<input type="text" id="linkUrl" placeholder="https://..." onkeydown="if(event.key==='Enter')addLink()">
+</div>
+</div>
+<div class="btn-group">
+<button class="btn" onclick="addLink()">➕ Добави</button>
+<button class="btn btn-secondary" onclick="exportLinks()">📤 Експорт</button>
+<button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 Импорт</button>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importLinks(event)">
+</div>
+<div class="search-box" style="margin-top:1.2rem">
+<input type="text" id="linkSearch" placeholder="Търси в линковете..." oninput="linkPage=1;renderLinks()">
+</div>
+<div id="linksList" class="links-list"></div>
+<div id="linksPager" class="links-pager"></div>
+</div>
+<!-- htaccess URL decoder -->
+<div class="tool" id="htaccess">
+<h2>🔀 URL Декодер за .htaccess</h2>
+<p class="desc">Конвертирай URL-encoded адреси в правилния формат за Apache Redirect директиви.</p>
+<label>Стар URL (от адресната лента)</label>
+<input type="text" id="htOldUrl" placeholder="https://example.com/%D0%BF%D1%8A%D1%82..." oninput="htDecodeLive()">
+<div class="result-box" id="htDecoded" style="min-height:44px;margin-top:.6rem">Декодираният път ще се появи тук...</div>
+<label style="margin-top:1rem">Нов URL (къде да препраща)</label>
+<input type="text" id="htNewUrl" placeholder="https://example.com/nov-put/">
+<div class="result-box" id="htDirective" style="min-height:44px;margin-top:.6rem">Готовата .htaccess директива ще се появи тук...</div>
+<div class="btn-group">
+<button class="btn" onclick="htAddToList()" style="background:#16a34a">➕ Добави към списъка</button>
+<button class="btn btn-secondary" onclick="htClear()" style="border-color:#f59e0b;color:#d97706">🗑 Изчисти полетата</button>
+<button class="btn btn-secondary" onclick="htCopyAll()">📋 Копирай всички</button>
+</div>
+<div id="htList" class="ht-list" style="margin-top:1.2rem"></div>
+<div class="info-box" style="margin-top:1.2rem">
+<strong>💡 Как работи:</strong>
+<ul style="margin:.5rem 0 0 1.2rem;font-size:.9rem;color:var(--text-muted)">
+<li>Въведи стария URL-encoded адрес в първото поле</li>
+<li>Въведи новия URL адрес във второто поле</li>
+<li>Натисни „Добави към списъка“ за да запазиш директивата</li>
+<li>Повтори за всички URL-и, които искаш да препратиш</li>
+<li>Копирай всички наведнъж за .htaccess файла</li>
+</ul>
+<p style="margin-top:.6rem;font-size:.85rem;color:var(--text-muted)"><strong>Пример:</strong><br><code>Redirect 301 /virtualna-mashina-kakvo-e/ https://urocibg.eu/virtualna-mashina/</code></p>
+</div>
+</div>
+<!-- YouTube yt-dlp -->
+<div class="tool" id="ytdlp">
+<h2>🎵 YouTube → MP3 (yt-dlp)</h2>
+<p class="desc">Генерира команда за yt-dlp + ffmpeg. Не сваля файлове — само създава командата, която да пуснеш локално.</p>
+<label>YouTube URL (видео или плейлист)</label>
+<input type="text" id="ytUrl" placeholder="https://www.youtube.com/watch?v=...">
+<div class="row" style="margin-top:1rem">
+<div>
+<label>Качество на MP3</label>
+<select id="ytQuality">
+<option value="128">128 kbps</option>
+<option value="192" selected>192 kbps</option>
+<option value="256">256 kbps</option>
+<option value="320">320 kbps</option>
+</select>
+</div>
+<div>
+<label>Шаблон на името</label>
+<select id="ytTemplate">
+<option value="%(title)s.%(ext)s" selected>Само заглавие</option>
+<option value="%(uploader)s - %(title)s.%(ext)s">Канал + заглавие</option>
+<option value="%(title)s [%(id)s].%(ext)s">Заглавие + ID</option>
+<option value="%(playlist_index)s - %(title)s.%(ext)s">Номер + заглавие (плейлист)</option>
+</select>
+</div>
+</div>
+<label style="margin-top:1rem">Папка за запис</label>
+<div class="row" style="align-items:end">
+<div style="flex:3">
+<input type="text" id="ytFolder" value="~/Downloads" placeholder="~/Downloads или C:\Users\...">
+</div>
+<div style="flex:0">
+<button class="btn btn-secondary" onclick="copyText($('ytFolder').value)" style="white-space:nowrap">📋 Копирай</button>
+</div>
+</div>
+<div class="btn-group">
+<button class="btn" onclick="ytGenerate()" style="background:#dc2626;flex:1;justify-content:center">⬇ Генерирай команда</button>
+</div>
+<div class="result-box" id="ytCommand" style="min-height:70px;margin-top:1rem;white-space:pre-wrap;word-break:break-all">Готово. Попълни URL и натисни бутона…</div>
+<div class="btn-group">
+<button class="btn btn-secondary" onclick="copyResult('ytCommand')">📋 Копирай командата</button>
+</div>
+<div class="info-box" style="margin-top:1.2rem">
+<strong>▶ Как да инсталираш yt-dlp и ffmpeg</strong>
+<details style="margin-top:.5rem;font-size:.9rem;color:var(--text-muted)">
+<summary style="cursor:pointer;color:var(--primary)">Разгъни инструкциите</summary>
+<div style="margin-top:.6rem;line-height:1.7">
+<p><strong>Windows:</strong><br>
+<code>winget install yt-dlp</code><br>
+<code>winget install ffmpeg</code></p>
+<p style="margin-top:.5rem"><strong>macOS:</strong><br>
+<code>brew install yt-dlp ffmpeg</code></p>
+<p style="margin-top:.5rem"><strong>Linux:</strong><br>
+<code>sudo apt install yt-dlp ffmpeg</code> &nbsp;или&nbsp; <code>pip install -U yt-dlp</code></p>
+<p style="margin-top:.5rem">След това копирай генерираната команда и я пусни в терминал.</p>
+</div>
+</details>
+</div>
+</div>
+<!-- UUID -->
+<div class="tool" id="uuid">
+<h2>🆔 UUID Generator</h2>
+<p class="desc">Генерира UUID v4.</p>
+<div class="btn-group">
+<button class="btn" onclick="genUUID()">Генерирай UUID</button>
+<button class="btn btn-secondary" onclick="copyResult('uuidResult')">Копирай</button>
+</div>
+<div class="result-box" id="uuidResult" style="min-height:50px">—</div>
+</div>
+<!-- Base64 -->
+<div class="tool" id="base64">
+<h2>📦 Base64 Encode / Decode</h2>
+<p class="desc">Кодирай или декодирай текст.</p>
+<label>Текст</label>
+<textarea id="b64Input" placeholder="Въведи текст..."></textarea>
+<div class="btn-group">
+<button class="btn" onclick="b64Encode()">Encode</button>
+<button class="btn" onclick="b64Decode()">Decode</button>
+<button class="btn btn-secondary" onclick="copyResult('b64Result')">Копирай</button>
+</div>
+<div class="result-box" id="b64Result" style="min-height:60px">—</div>
+</div>
+<!-- Hash -->
+<div class="tool" id="hash">
+<h2>#️⃣ SHA-256 Hash</h2>
+<p class="desc">Изчислява SHA-256 хеш (Web Crypto API).</p>
+<label>Текст</label>
+<textarea id="hashInput" placeholder="Въведи текст за хеширане..."></textarea>
+<div class="btn-group">
+<button class="btn" onclick="doHash()">Хеширай</button>
+<button class="btn btn-secondary" onclick="copyResult('hashResult')">Копирай</button>
+</div>
+<div class="result-box" id="hashResult" style="min-height:50px">—</div>
+</div>
+<!-- Timestamp -->
+<div class="tool" id="timestamp">
+<h2>⏰ Timestamp Converter</h2>
+<p class="desc">Unix timestamp ↔ човешко четим формат.</p>
+<div class="row">
+<div><label>Unix Timestamp</label><input type="text" id="tsInput" placeholder="1723104000"></div>
+<div><label>Или дата</label><input type="text" id="dateInput" placeholder="2025-08-08 12:00:00"></div>
+</div>
+<div class="btn-group">
+<button class="btn" onclick="tsToDate()">Timestamp → Дата</button>
+<button class="btn" onclick="dateToTs()">Дата → Timestamp</button>
+<button class="btn btn-secondary" onclick="nowTs()">Сега</button>
+</div>
+<div class="result-box" id="tsResult" style="min-height:50px">—</div>
+</div>
+<!-- JSON -->
+<div class="tool" id="json">
+<h2>🧩 JSON Formatter</h2>
+<p class="desc">Форматира и валидира JSON.</p>
+<label>JSON</label>
+<textarea id="jsonInput" placeholder='{"key": "value"}'></textarea>
+<div class="btn-group">
+<button class="btn" onclick="formatJSON()">Форматирай</button>
+<button class="btn" onclick="minifyJSON()">Минифицирай</button>
+<button class="btn btn-secondary" onclick="copyResult('jsonResult')">Копирай</button>
+</div>
+<div class="result-box" id="jsonResult" style="min-height:80px;white-space:pre-wrap">—</div>
+</div>
+<!-- Lorem -->
+<div class="tool" id="lorem">
+<h2>📄 Lorem Ipsum</h2>
+<p class="desc">Генерира placeholder текст.</p>
+<div class="row"><div><label>Брой параграфи</label><input type="number" id="loremCount" value="2" min="1" max="10"></div></div>
+<div class="btn-group">
+<button class="btn" onclick="genLorem()">Генерирай</button>
+<button class="btn btn-secondary" onclick="copyResult('loremResult')">Копирай</button>
+</div>
+<div class="result-box" id="loremResult" style="min-height:80px;white-space:pre-wrap;font-family:inherit">—</div>
+</div>
+</main>
+</div>
+<footer>Dev Tools Pro • Самостоятелен инструмент • Данните не напускат браузъра</footer>
+<div class="toast" id="toast">Копирано!</div>
+<script>
+const $=id=>document.getElementById(id);
+const themeBtn=$('themeBtn');
+const saved=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+document.documentElement.setAttribute('data-theme',saved);
+themeBtn.textContent=saved==='dark'?'☀️':'🌙';
+themeBtn.onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);themeBtn.textContent=n==='dark'?'☀️':'🌙'};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tool').forEach(t=>t.classList.remove('active'));b.classList.add('active');$(b.dataset.tool).classList.add('active')});
+function showToast(m='Копирано!'){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+function copyResult(id){const t=$(id).textContent;if(!t||t==='—'||t.includes('ще се появи'))return;navigator.clipboard.writeText(t).then(()=>showToast())}
+function copyText(t){navigator.clipboard.writeText(t).then(()=>showToast())}
+/* Translit */
+const bgMap={'А':'A','а':'a','Б':'B','б':'b','В':'V','в':'v','Г':'G','г':'g','Д':'D','д':'d','Е':'E','е':'e','Ж':'Zh','ж':'zh','З':'Z','з':'z','И':'I','и':'i','Й':'Y','й':'y','К':'K','к':'k','Л':'L','л':'l','М':'M','м':'m','Н':'N','н':'n','О':'O','о':'o','П':'P','п':'p','Р':'R','р':'r','С':'S','с':'s','Т':'T','т':'t','У':'U','у':'u','Ф':'F','ф':'f','Х':'H','х':'h','Ц':'Ts','ц':'ts','Ч':'Ch','ч':'ch','Ш':'Sh','ш':'sh','Щ':'Sht','щ':'sht','Ъ':'A','ъ':'a','Ь':'Y','ь':'y','Ю':'Yu','ю':'yu','Я':'Ya','я':'ya'};
+function doTranslit(){let t=$('cyrInput').value;const sep=$('slugSep').value,low=$('toLower').checked;t=t.replace(/дж/gi,m=>m[0]==='Д'?'Dzh':'dzh').replace(/ьо/gi,'yo').replace(/йо/gi,'yo').replace(/ия\b/gi,'ia');let r='';for(const c of t)r+=bgMap[c]||c;r=r.replace(/[^\w\s-]/g,'').replace(/[\s_]+/g,sep||'').replace(new RegExp(sep+'+','g'),sep).replace(new RegExp('^'+sep+'|'+sep+'$','g'),'');if(low)r=r.toLowerCase();$('translitResult').textContent=r||'—'}
+function clearTranslit(){$('cyrInput').value='';$('translitResult').textContent='Резултатът ще се появи тук...'}
+/* Emoji */
+const emojis=[{e:'🐳',n:'Docker'},{e:'🐋',n:'Whale'},{e:'📦',n:'Package'},{e:'☸️',n:'Kubernetes'},{e:'🐧',n:'Linux'},{e:'🚀',n:'Deploy'},{e:'☁️',n:'Cloud'},{e:'🖥️',n:'Server'},{e:'💾',n:'Database'},{e:'🗄️',n:'DB Storage'},{e:'🛢️',n:'Oil Barrel'},{e:'🗃️',n:'Archive'},{e:'🔧',n:'Config'},{e:'⚙️',n:'Settings'},{e:'🛠️',n:'Tools'},{e:'🏗️',n:'Build'},{e:'🔒',n:'Security'},{e:'🛡️',n:'Shield'},{e:'🔑',n:'Key'},{e:'🔐',n:'Locked'},{e:'🌐',n:'Web'},{e:'🔗',n:'Link'},{e:'📡',n:'Network'},{e:'📶',n:'Signal'},{e:'💻',n:'Laptop'},{e:'⌨️',n:'Keyboard'},{e:'🖱️',n:'Mouse'},{e:'📱',n:'Mobile'},{e:'🐛',n:'Bug'},{e:'🔥',n:'Hotfix'},{e:'✨',n:'Feature'},{e:'♻️',n:'Refactor'},{e:'📝',n:'Docs'},{e:'📚',n:'Books'},{e:'🧪',n:'Test'},{e:'✅',n:'Done'},{e:'⚠️',n:'Warning'},{e:'❌',n:'Error'},{e:'💡',n:'Idea'},{e:'🎯',n:'Target'},{e:'📊',n:'Chart'},{e:'📈',n:'Growth'},{e:'📉',n:'Decline'},{e:'🧩',n:'Plugin'},{e:'🐙',n:'GitHub'},{e:'🦊',n:'GitLab'},{e:'🤖',n:'Bot'},{e:'🧠',n:'AI'},{e:'⚡',n:'Performance'},{e:'♾️',n:'Infinity'},{e:'🔄',n:'Sync'},{e:'🔁',n:'Loop'},{e:'📤',n:'Upload'},{e:'📥',n:'Download'},{e:'📂',n:'Folder'},{e:'📄',n:'File'},{e:'🏷️',n:'Tag'},{e:'🔖',n:'Bookmark'},{e:'📌',n:'Pin'},{e:'📎',n:'Clip'},{e:'🛳️',n:'Ship'},{e:'⚓',n:'Anchor'},{e:'🐘',n:'PostgreSQL'},{e:'🐬',n:'MySQL'},{e:'🍃',n:'MongoDB'},{e:'🔴',n:'Redis'},{e:'🟦',n:'WordPress'},{e:'🔶',n:'Proxmox'},{e:'🟢',n:'Node.js'},{e:'☕',n:'Java'},{e:'🐍',n:'Python'},{e:'🦀',n:'Rust'},{e:'🐹',n:'Go'},{e:'💎',n:'Ruby'},{e:'⚛️',n:'React'},{e:'👷',n:'Worker'},{e:'👨‍💻',n:'Developer'},{e:'👩‍💻',n:'Dev'},{e:'🧑‍💻',n:'Coder'},{e:'📅',n:'Calendar'},{e:'⏱️',n:'Timer'},{e:'⌛',n:'Hourglass'},{e:'🔔',n:'Notify'},{e:'💬',n:'Chat'},{e:'📢',n:'Announce'},{e:'🕵️',n:'Debug'},{e:'🧹',n:'Cleanup'}];
+function renderEmojis(l=emojis){$('emojiGrid').innerHTML=l.map(i=>`<div class="emoji-item" onclick="copyEmoji('${i.e}')" title="Копирай"><span class="e">${i.e}</span><span class="n">${i.n}</span></div>`).join('')}
+function filterEmojis(){const q=$('emojiSearch').value.toLowerCase();renderEmojis(emojis.filter(e=>e.n.toLowerCase().includes(q)||e.e.includes(q)))}
+function copyEmoji(e){navigator.clipboard.writeText(e).then(()=>showToast('Емоджи копирано!'))}
+renderEmojis();
+/* Password */
+function generatePassword(){const len=+$('passLen').value,u=$('upper').checked,l=$('lower').checked,n=$('numbers').checked,s=$('symbols').checked,a=$('excludeAmbiguous').checked;let c='';if(u)c+=a?'ABCDEFGHJKLMNPQRSTUVWXYZ':'ABCDEFGHIJKLMNOPQRSTUVWXYZ';if(l)c+=a?'abcdefghijkmnopqrstuvwxyz':'abcdefghijklmnopqrstuvwxyz';if(n)c+=a?'23456789':'0123456789';if(s)c+='!@#$%^&*()_+-=[]{}|;:,.<>?';if(!c){$('passResult').textContent='Избери поне един тип!';return}const arr=new Uint32Array(len);crypto.getRandomValues(arr);let p='';for(let i=0;i<len;i++)p+=c[arr[i]%c.length];$('passResult').textContent=p;updateStrength(p)}
+function updateStrength(p){let sc=0;if(p.length>=12)sc+=25;if(p.length>=16)sc+=15;if(p.length>=20)sc+=10;if(/[A-Z]/.test(p))sc+=15;if(/[a-z]/.test(p))sc+=15;if(/[0-9]/.test(p))sc+=15;if(/[^A-Za-z0-9]/.test(p))sc+=20;const b=$('strengthBar'),t=$('strengthText');b.style.width=Math.min(sc,100)+'%';if(sc<40){b.style.background='#dc2626';t.textContent='Слаба'}else if(sc<70){b.style.background='#f59e0b';t.textContent='Средна'}else{b.style.background='#059669';t.textContent='Силна'}}
+/* Color */
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];const n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min)h=s=0;else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4}h/=6}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)]}
+function updateColor(hex){if(!/^#([0-9A-Fa-f]{3}){1,2}$/.test(hex))return;$('colorPreview').style.background=hex;$('colorInput').value=hex;$('hexManual').value=hex;const[r,g,b]=hexToRgb(hex);const[h,s,l]=rgbToHsl(r,g,b);const rgb=`rgb(${r}, ${g}, ${b})`,hsl=`hsl(${h}, ${s}%, ${l}%)`;$('colorValues').innerHTML=`<div class="val" onclick="copyText(this.dataset.v)" data-v="${hex}"><span>HEX</span>${hex}</div><div class="val" onclick="copyText(this.dataset.v)" data-v="${rgb}"><span>RGB</span>${rgb}</div><div class="val" onclick="copyText(this.dataset.v)" data-v="${hsl}"><span>HSL</span>${hsl}</div>`}
+function manualHex(v){if(!v.startsWith('#'))v='#'+v;if(/^#([0-9A-Fa-f]{3}){1,2}$/.test(v))updateColor(v)}
+/* Markdown – lightweight parser */
+function mdParse(src){let s=src.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+s=s.replace(/^###### (.+)$/gm,'<h6>$1</h6>').replace(/^##### (.+)$/gm,'<h5>$1</h5>').replace(/^#### (.+)$/gm,'<h4>$1</h4>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>');
+s=s.replace(/```([\s\S]*?)```/g,(_,c)=>'<pre><code>'+c.trim()+'</code></pre>');
+s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+s=s.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/~~(.+?)~~/g,'<del>$1</del>');
+s=s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1">').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+s=s.replace(/^>\s?(.+)$/gm,'<blockquote>$1</blockquote>');
+s=s.replace(/^(-{3,}|\*{3,}|_{3,})$/gm,'<hr>');
+s=s.replace(/^\|(.+)\|$/gm,(_,row)=>{const cells=row.split('|').map(c=>c.trim());const tag=cells.every(c=>/^[-:]+$/.test(c))?'':(s.includes('<th>')?'td':'th');if(!tag)return'';return'<tr>'+cells.map(c=>`<${tag}>${c}</${tag}>`).join('')+'</tr>'});
+s=s.replace(/(<tr>[\s\S]*?<\/tr>)+/g,m=>'<table>'+m.replace(/<th>/g,(x,i)=>i===0||!m.includes('</th><th>')?x:x)+'</table>');
+s=s.replace(/^(?:[\*\-\+] (.+)(?:\n|$))+/gm,m=>'<ul>'+m.trim().split(/\n/).map(l=>'<li>'+l.replace(/^[\*\-\+] /,'')+'</li>').join('')+'</ul>');
+s=s.replace(/^(?:\d+\. (.+)(?:\n|$))+/gm,m=>'<ol>'+m.trim().split(/\n/).map(l=>'<li>'+l.replace(/^\d+\. /,'')+'</li>').join('')+'</ol>');
+s=s.replace(/^(?!<[huplo]|<bl|<ta|<hr|<pre)(.+)$/gm,'<p>$1</p>');
+s=s.replace(/<p><\/p>/g,'').replace(/<\/blockquote>\s*<blockquote>/g,'<br>');
+return s}
+function renderMD(){const v=$('mdInput').value;$('mdPreview').innerHTML=v?mdParse(v):'<p style="color:var(--text-muted)">Прегледът ще се появи тук...</p>';$('mdSource').value=v}
+function mdInsert(before,after){const ta=$('mdInput'),start=ta.selectionStart,end=ta.selectionEnd,sel=ta.value.substring(start,end);ta.value=ta.value.substring(0,start)+before+sel+after+ta.value.substring(end);ta.focus();ta.selectionStart=ta.selectionEnd=start+before.length+(sel?sel.length:0);renderMD()}
+/* UUID */
+function genUUID(){$('uuidResult').textContent=crypto.randomUUID()}
+/* Base64 */
+function b64Encode(){try{$('b64Result').textContent=btoa(unescape(encodeURIComponent($('b64Input').value)))}catch(e){$('b64Result').textContent='Грешка'}}
+function b64Decode(){try{$('b64Result').textContent=decodeURIComponent(escape(atob($('b64Input').value)))}catch(e){$('b64Result').textContent='Невалиден Base64'}}
+/* Hash */
+async function doHash(){const d=new TextEncoder().encode($('hashInput').value);const buf=await crypto.subtle.digest('SHA-256',d);$('hashResult').textContent=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+/* Timestamp */
+function tsToDate(){const ts=$('tsInput').value.trim();if(!ts)return;const d=new Date(ts.length<=10?ts*1000:+ts);$('tsResult').textContent=d.toString()+'\nISO: '+d.toISOString()}
+function dateToTs(){const d=new Date($('dateInput').value.trim());if(isNaN(d))$('tsResult').textContent='Невалидна дата';else $('tsResult').textContent=Math.floor(d.getTime()/1000)+' (s)\n'+d.getTime()+' (ms)'}
+function nowTs(){const n=Date.now();$('tsInput').value=Math.floor(n/1000);$('tsResult').textContent=Math.floor(n/1000)+' (s)\n'+n+' (ms)\n'+new Date(n).toString()}
+/* JSON */
+function formatJSON(){try{$('jsonResult').textContent=JSON.stringify(JSON.parse($('jsonInput').value),null,2)}catch(e){$('jsonResult').textContent='Невалиден JSON: '+e.message}}
+function minifyJSON(){try{$('jsonResult').textContent=JSON.stringify(JSON.parse($('jsonInput').value))}catch(e){$('jsonResult').textContent='Невалиден JSON: '+e.message}}
+/* Lorem */
+const lorem=`Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.`;
+function genLorem(){const c=Math.min(10,Math.max(1,+$('loremCount').value||2)),p=lorem.split('\n\n');let r='';for(let i=0;i<c;i++)r+=p[i%p.length]+'\n\n';$('loremResult').textContent=r.trim()}
+/* Links / Bookmarks */
+const LINKS_KEY='devtools_links';
+const LINKS_PER_PAGE=10;
+let linkPage=1;
+function getLinks(){try{return JSON.parse(localStorage.getItem(LINKS_KEY)||'[]')}catch(e){return[]}}
+function saveLinks(arr){localStorage.setItem(LINKS_KEY,JSON.stringify(arr))}
+function addLink(){const title=$('linkTitle').value.trim(),url=$('linkUrl').value.trim();if(!title||!url){showToast('Попълни заглавие и URL');return}let u=url;if(!/^https?:\/\//i.test(u))u='https://'+u;const links=getLinks();links.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title,url:u,added:Date.now()});saveLinks(links);$('linkTitle').value='';$('linkUrl').value='';linkPage=1;renderLinks();showToast('Линкът е добавен')}
+function deleteLink(id){if(!confirm('Изтриване на линка?'))return;saveLinks(getLinks().filter(l=>l.id!==id));const q=($('linkSearch')?.value||'').toLowerCase();let filtered=getLinks();if(q)filtered=filtered.filter(l=>l.title.toLowerCase().includes(q)||l.url.toLowerCase().includes(q));const maxPage=Math.max(1,Math.ceil(filtered.length/LINKS_PER_PAGE));if(linkPage>maxPage)linkPage=maxPage;renderLinks();showToast('Изтрит')}
+function openLink(url){window.open(url,'_blank','noopener')}
+function copyLinkUrl(url){navigator.clipboard.writeText(url).then(()=>showToast('URL копиран'))}
+function goLinkPage(p){linkPage=p;renderLinks();$('linksList')?.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function renderLinks(){const q=($('linkSearch')?.value||'').toLowerCase();const list=$('linksList'),pager=$('linksPager');if(!list)return;let links=getLinks();if(q)links=links.filter(l=>l.title.toLowerCase().includes(q)||l.url.toLowerCase().includes(q));const total=links.length,pages=Math.max(1,Math.ceil(total/LINKS_PER_PAGE));if(linkPage>pages)linkPage=pages;if(linkPage<1)linkPage=1;if(!total){list.innerHTML='<div class="links-empty">'+(q?'Няма резултати':'Все още нямаш линкове.<br>Добави първия по-горе!')+'</div>';if(pager)pager.innerHTML='';return}const start=(linkPage-1)*LINKS_PER_PAGE,slice=links.slice(start,start+LINKS_PER_PAGE);list.innerHTML=slice.map(l=>`<div class="link-item"><div class="link-info"><div class="link-title">${esc(l.title)}</div><div class="link-url">${esc(l.url)}</div></div><div class="link-actions"><button onclick="openLink('${escAttr(l.url)}')" title="Отвори">↗</button><button onclick="copyLinkUrl('${escAttr(l.url)}')" title="Копирай URL">📋</button><button class="del" onclick="deleteLink('${l.id}')" title="Изтрий">✕</button></div></div>`).join('');if(pager){if(pages<=1){pager.innerHTML=`<span class="pager-info">${total} линк${total===1?'':'а'}</span>`;return}let html=`<button onclick="goLinkPage(${linkPage-1})" ${linkPage===1?'disabled':''} title="Предишна">‹</button>`;const maxBtn=5;let from=Math.max(1,linkPage-Math.floor(maxBtn/2)),to=Math.min(pages,from+maxBtn-1);if(to-from<maxBtn-1)from=Math.max(1,to-maxBtn+1);if(from>1)html+=`<button onclick="goLinkPage(1)">1</button>${from>2?'<span class="pager-info">…</span>':''}`;for(let i=from;i<=to;i++)html+=`<button class="${i===linkPage?'active':''}" onclick="goLinkPage(${i})">${i}</button>`;if(to<pages)html+=`${to<pages-1?'<span class="pager-info">…</span>':''}<button onclick="goLinkPage(${pages})">${pages}</button>`;html+=`<button onclick="goLinkPage(${linkPage+1})" ${linkPage===pages?'disabled':''} title="Следваща">›</button>`;html+=`<span class="pager-info">${start+1}–${Math.min(start+LINKS_PER_PAGE,total)} от ${total}</span>`;pager.innerHTML=html}}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function escAttr(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}
+function exportLinks(){const data=JSON.stringify(getLinks(),null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='devtools-links.json';a.click();URL.revokeObjectURL(a.href);showToast('Експортирано')}
+function importLinks(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const arr=JSON.parse(r.result);if(!Array.isArray(arr))throw 0;const existing=getLinks();const ids=new Set(existing.map(l=>l.id));const merged=arr.filter(l=>l.title&&l.url&&!ids.has(l.id)).map(l=>({id:l.id||Date.now().toString(36),title:l.title,url:l.url,added:l.added||Date.now()}));saveLinks([...merged,...existing]);linkPage=1;renderLinks();showToast('Импортирани: '+merged.length)}catch(e){showToast('Невалиден JSON файл')}};r.readAsText(f);ev.target.value=''}
+renderLinks();
+/* ===== htaccess URL Decoder ===== */
+const HT_KEY='devtools_htaccess';
+function htGet(){try{return JSON.parse(localStorage.getItem(HT_KEY)||'[]')}catch(e){return[]}}
+function htSave(a){localStorage.setItem(HT_KEY,JSON.stringify(a))}
+function htExtractPath(url){try{const u=new URL(url);return decodeURIComponent(u.pathname+(u.search||'')+(u.hash||''))}catch(e){try{return decodeURIComponent(url)}catch(e2){return url}}}
+function htDecodeLive(){const old=$('htOldUrl').value.trim();const path=old?htExtractPath(old):'';$('htDecoded').textContent=path||'Декодираният път ще се появи тук...';htUpdateDirective()}
+function htUpdateDirective(){const path=$('htDecoded').textContent;const neu=$('htNewUrl').value.trim();if(!path||path.includes('ще се появи')||!neu){$('htDirective').textContent='Готовата .htaccess директива ще се появи тук...';return}const p=path.startsWith('/')?path:'/'+path;$('htDirective').textContent='Redirect 301 '+p+' '+neu}
+document.getElementById('htNewUrl')?.addEventListener('input',htUpdateDirective);
+function htAddToList(){htDecodeLive();htUpdateDirective();const dir=$('htDirective').textContent;if(!dir||dir.includes('ще се появи')){showToast('Попълни двата URL-а');return}const list=htGet();if(list.includes(dir)){showToast('Вече е в списъка');return}list.push(dir);htSave(list);htRenderList();showToast('Добавено')}
+function htRemove(i){const list=htGet();list.splice(i,1);htSave(list);htRenderList()}
+function htRenderList(){const box=$('htList');if(!box)return;const list=htGet();if(!list.length){box.innerHTML='<div class="ht-empty">Списъкът е празен — добави директиви по-горе</div>';return}box.innerHTML=list.map((d,i)=>`<div class="ht-item"><code>${esc(d)}</code><button onclick="htRemove(${i})" title="Премахни">✕</button></div>`).join('')}
+function htCopyAll(){const list=htGet();if(!list.length){showToast('Списъкът е празен');return}navigator.clipboard.writeText(list.join('\n')).then(()=>showToast('Копирани '+list.length+' директиви'))}
+function htClear(){$('htOldUrl').value='';$('htNewUrl').value='';$('htDecoded').textContent='Декодираният път ще се появи тук...';$('htDirective').textContent='Готовата .htaccess директива ще се появи тук...'}
+htRenderList();
+/* ===== YouTube yt-dlp ===== */
+function ytGenerate(){const url=$('ytUrl').value.trim();if(!url){showToast('Въведи YouTube URL');return}const q=$('ytQuality').value;const tpl=$('ytTemplate').value;const folder=$('ytFolder').value.trim()||'~/Downloads';const cmd=`yt-dlp -x --audio-format mp3 --audio-quality ${q}K -o "${folder.replace(/\\/g,'/')}/${tpl}" "${url}"`;$('ytCommand').textContent=cmd;showToast('Командата е готова')}
+generatePassword();
+</script>
+</body>
+</html>
