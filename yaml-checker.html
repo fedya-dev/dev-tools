@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAML Front Matter Checker — всички портали</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<style>
+  :root{
+    --bg: #0e1015;
+    --panel: #161922;
+    --panel-2: #1c2029;
+    --border: #2a2f3a;
+    --text: #e7e9ee;
+    --muted: #8991a1;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --ok: #4ade80;
+    --ok-bg: rgba(74, 222, 128, 0.10);
+    --warn: #f2b84b;
+    --warn-bg: rgba(242, 184, 75, 0.10);
+    --err: #f2685c;
+    --err-bg: rgba(242, 104, 92, 0.12);
+    --info: #6cb6e8;
+    --info-bg: rgba(108, 182, 232, 0.10);
+    --accent: #6cb6e8;
+    --purple: #a78bfa;
+    --green: #4ade80;
+    --orange: #fb923c;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+  header .sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .status-pill {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--panel-2);
+    color: var(--muted);
+  }
+  .status-pill.ok { color: var(--ok); border-color: rgba(74,222,128,0.35); background: var(--ok-bg); }
+  .status-pill.err { color: var(--err); border-color: rgba(242,104,92,0.35); background: var(--err-bg); }
+  .status-pill.warn { color: var(--warn); border-color: rgba(242,184,75,0.35); background: var(--warn-bg); }
+
+  /* ===== Tabs ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: var(--sans);
+    transition: all 0.15s ease;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  .tab[data-project="trainbrakes"].active { border-bottom-color: var(--orange); }
+  .tab[data-project="zdravemag"].active { border-bottom-color: var(--green); }
+  .tab[data-project="linuxdevops"].active { border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ===== Команди секция ===== */
+  .commands {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .commands h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+    margin: 0 0 12px 0;
+    font-weight: 600;
+  }
+  .cmd-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmd-row:last-child { border-bottom: none; }
+  .cmd-label {
+    width: 110px;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .cmd-code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 6px 10px;
+    flex: 1;
+    color: var(--ok);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .cmd-desc {
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+    max-width: 280px;
+    text-align: right;
+  }
+  .cmd-desc code {
+    font-family: var(--mono);
+    background: var(--panel-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+  @media (max-width: 700px) {
+    .cmd-row { flex-wrap: wrap; }
+    .cmd-label, .cmd-desc { width: auto; max-width: none; text-align: left; }
+  }
+  .copy-small {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--muted);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .copy-small:hover { color: var(--text); border-color: #3a4152; }
+  .copy-small.copied { color: var(--ok); border-color: rgba(74,222,128,0.5); }
+
+  /* ===== Шаблони секция ===== */
+  .templates {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .templates h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+    margin: 0 0 12px 0;
+    font-weight: 600;
+  }
+  .template-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tpl-btn {
+    flex: 1;
+    min-width: 180px;
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s ease;
+  }
+  .tpl-btn:hover {
+    border-color: var(--accent);
+    background: #212632;
+  }
+  .tpl-btn .tpl-title {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .tpl-btn .tpl-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  /* ===== Обичайни ===== */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  button.plain {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button.plain:hover { border-color: #3a4152; background: #212632; }
+  button.primary {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #0e1015;
+    cursor: pointer;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+
+  .panes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 880px) {
+    .panes { grid-template-columns: 1fr; }
+  }
+  .pane {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .pane-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-2);
+  }
+  .editor-body {
+    display: flex;
+    height: 460px;
+  }
+  .gutter {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 20px;
+    color: #4a5261;
+    background: var(--panel-2);
+    padding: 12px 8px 12px 0;
+    text-align: right;
+    user-select: none;
+    overflow: hidden;
+    white-space: pre;
+  }
+  textarea {
+    flex: 1;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 20px;
+    padding: 12px 14px;
+    tab-size: 2;
+  }
+  .result-body {
+    height: 460px;
+    overflow-y: auto;
+    padding: 0;
+  }
+  .code-line {
+    display: flex;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 20px;
+    border-left: 3px solid transparent;
+  }
+  .code-line .ln {
+    width: 38px;
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 8px;
+    color: #4a5261;
+    user-select: none;
+  }
+  .code-line .content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 0 10px 0 4px;
+  }
+  .code-line.sev-error { border-left-color: var(--err); background: var(--err-bg); }
+  .code-line.sev-warning { border-left-color: var(--warn); background: var(--warn-bg); }
+  .code-line.sev-info { border-left-color: var(--info); background: var(--info-bg); }
+
+  .annotation {
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 3px 14px 8px 46px;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .annotation .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .annotation.error .tag { background: var(--err); color: #26100e; }
+  .annotation.warning .tag { background: var(--warn); color: #2a1f08; }
+  .annotation.info .tag { background: var(--info); color: #0c1e2c; }
+  .annotation.error { color: #ffb3ac; }
+  .annotation.warning { color: #ffd58e; }
+  .annotation.info { color: #a9d7f5; }
+
+  .placeholder {
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .issues {
+    margin-top: 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .issues-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-2);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .issue-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .issue-row:last-child { border-bottom: none; }
+  .issue-row .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .issue-row.error .badge { background: var(--err-bg); color: var(--err); border: 1px solid rgba(242,104,92,0.35); }
+  .issue-row.warning .badge { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(242,184,75,0.35); }
+  .issue-row.info .badge { background: var(--info-bg); color: var(--info); border: 1px solid rgba(108,182,232,0.35); }
+  .issue-row .loc {
+    font-family: var(--mono);
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 56px;
+  }
+  .issue-row .msg { color: var(--text); }
+  .issue-row .msg code {
+    font-family: var(--mono);
+    background: var(--panel-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* Project banner */
+  .project-banner {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .project-banner .project-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .project-banner .project-url {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  #toast {
+    visibility: hidden;
+    min-width: 200px;
+    background-color: var(--ok);
+    color: #0e1015;
+    text-align: center;
+    border-radius: 4px;
+    padding: 12px 18px;
+    position: fixed;
+    z-index: 100;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  #toast.show {
+    visibility: visible;
+    animation: fadein 0.4s, fadeout 0.4s 1.6s;
+  }
+  @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+  @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>YAML Front Matter Checker</h1>
+      <div class="sub">Проверява YAML front matter за трите портала — шаблони и команди за всеки.</div>
+    </div>
+    <div class="status-pill" id="statusPill">няма проверка</div>
+  </header>
+
+  <!-- ===== TABS ===== -->
+<div class="tabs" style="display: flex; align-items: center; width: 100%;">
+    <button class="tab active" data-project="linuxdevops" onclick="switchProject('linuxdevops')">🐧 Linux-DevOps</button>
+    <button class="tab" data-project="trainbrakes" onclick="switchProject('trainbrakes')">🚆 TrainBrakes</button>
+    <button class="tab" data-project="zdravemag" onclick="switchProject('zdravemag')">🌿 Здраве &amp; Красота</button>
+	
+<a href="https://fedia.eu" style="text-decoration: none; display: inline-block; margin-left: auto;">
+    <button class="tab" data-project="dev.fedia.eu" onclick="switchProject('dev.fedia.eu')" 
+            style="border: 1.5px solid #22c55e; border-radius: 6px; font-weight: 600; background-color: rgba(34, 197, 94, 0.05); color: #16a34a; transition: all 0.2s ease; cursor: pointer;"
+            onmouseover="this.style.backgroundColor='rgba(34, 197, 94, 0.15)'" 
+            onmouseout="this.style.backgroundColor='rgba(34, 197, 94, 0.05)'">
+         🛠️ Към dev.fedia.eu
+    </button>
+</a>
+
+</div>
+
+
+  <!-- ============================================================ -->
+  <!-- LINUX-DEVOPS -->
+  <!-- ============================================================ -->
+  <div class="tab-content active" id="tab-linuxdevops">
+
+    <div class="project-banner">
+      <span class="project-dot" style="background: var(--accent);"></span>
+      <strong>Linux-DevOps портал</strong>
+      <span class="project-url">linuxdev.fedia.eu</span>
+    </div>
+
+    <div class="commands">
+      <h2>⚡ Команди за нова статия</h2>
+      <div class="cmd-row">
+        <span class="cmd-label">📝 Post</span>
+        <code class="cmd-code" id="cmd-ld-post">npm run new:post "Заглавие на статия"</code>
+        <span class="cmd-desc">→ <code>src/content/posts/</code></span>
+        <button class="copy-small" onclick="copyCmd('cmd-ld-post', this)">Копирай</button>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-label">📚 Tutorial</span>
+        <code class="cmd-code" id="cmd-ld-tutorial">npm run new:tutorial "Заглавие на урок"</code>
+        <span class="cmd-desc">→ <code>src/content/tutorials/</code></span>
+        <button class="copy-small" onclick="copyCmd('cmd-ld-tutorial', this)">Копирай</button>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-label">🐧 Script</span>
+        <code class="cmd-code" id="cmd-ld-script">npm run new:script "Заглавие на скрипт"</code>
+        <span class="cmd-desc">→ <code>src/content/scripts/</code></span>
+        <button class="copy-small" onclick="copyCmd('cmd-ld-script', this)">Копирай</button>
+      </div>
+    </div>
+
+    <div class="templates">
+      <h2>📋 Шаблони — зареди в редактора</h2>
+      <div class="template-buttons">
+        <button class="tpl-btn" onclick="loadTemplate('linuxdevops', 'post')">
+          <span class="tpl-title" style="color: var(--info);">📝 Post</span>
+          <span class="tpl-sub">readTime, author</span>
+        </button>
+        <button class="tpl-btn" onclick="loadTemplate('linuxdevops', 'tutorial')">
+          <span class="tpl-title" style="color: var(--purple);">📚 Tutorial</span>
+          <span class="tpl-sub">level, duration, prerequisites</span>
+        </button>
+        <button class="tpl-btn" onclick="loadTemplate('linuxdevops', 'script')">
+          <span class="tpl-title" style="color: var(--ok);">🐧 Script</span>
+          <span class="tpl-sub">version, language, dependencies</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TRAINBRAKES -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-trainbrakes">
+
+    <div class="project-banner">
+      <span class="project-dot" style="background: var(--orange);"></span>
+      <strong>TrainBrakes</strong>
+      <span class="project-url">trainbrakes.com</span>
+    </div>
+
+    <div class="commands">
+      <h2>⚡ Команда за нова статия</h2>
+      <div class="cmd-row">
+        <span class="cmd-label">🚆 Article</span>
+        <code class="cmd-code" id="cmd-tb-article">npx newmd articles "Заглавие на статия" --path ./src/content/articles</code>
+        <span class="cmd-desc">→ <code>src/content/articles/</code></span>
+        <button class="copy-small" onclick="copyCmd('cmd-tb-article', this)">Копирай</button>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-label">🔧 Същата (скрипт)</span>
+        <code class="cmd-code" id="cmd-tb-script">npm run new:article "Заглавие на статия"</code>
+        <span class="cmd-desc">ако си добавил скрипта</span>
+        <button class="copy-small" onclick="copyCmd('cmd-tb-script', this)">Копирай</button>
+      </div>
+    </div>
+
+    <div class="templates">
+      <h2>📋 Шаблон за статия</h2>
+      <div class="template-buttons">
+        <button class="tpl-btn" onclick="loadTemplate('trainbrakes', 'article')">
+          <span class="tpl-title" style="color: var(--orange);">🚆 Article</span>
+          <span class="tpl-sub">verdict, category</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="commands" style="margin-top: 16px;">
+      <h2>📌 Категории в TrainBrakes (enum)</h2>
+      <div style="font-family: var(--mono); font-size: 13px; color: var(--muted); line-height: 1.9;">
+        <code style="color: var(--orange);">Спирачки</code> ·
+        <code style="color: var(--orange);">UIC стандарти</code> ·
+        <code style="color: var(--orange);">Европейски стандарти</code> ·
+        <code style="color: var(--orange);">Поддръжка</code> ·
+        <code style="color: var(--orange);">Нови влакове</code> ·
+        <code style="color: var(--orange);">Железопътна техническа библиотека</code> ·
+        <code style="color: var(--orange);">Анализи</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ZDRAVEMAG -->
+  <!-- ============================================================ -->
+  <div class="tab-content" id="tab-zdravemag">
+
+    <div class="project-banner">
+      <span class="project-dot" style="background: var(--green);"></span>
+      <strong>Здраве &amp; Красота</strong>
+      <span class="project-url">zdravemag.com</span>
+    </div>
+
+    <div class="commands">
+      <h2>⚡ Команда за нова статия</h2>
+      <div class="cmd-row">
+        <span class="cmd-label">🌿 Article</span>
+        <code class="cmd-code" id="cmd-zm-article">npx newmd blog "Заглавие на статия"</code>
+        <span class="cmd-desc">→ <code>src/content/blog/</code></span>
+        <button class="copy-small" onclick="copyCmd('cmd-zm-article', this)">Копирай</button>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-label">🔧 Същата (скрипт)</span>
+        <code class="cmd-code" id="cmd-zm-script">npm run new:post "Заглавие на статия"</code>
+        <span class="cmd-desc">ако си добавил скрипта</span>
+        <button class="copy-small" onclick="copyCmd('cmd-zm-script', this)">Копирай</button>
+      </div>
+    </div>
+
+    <div class="templates">
+      <h2>📋 Шаблон за статия</h2>
+      <div class="template-buttons">
+        <button class="tpl-btn" onclick="loadTemplate('zdravemag', 'article')">
+          <span class="tpl-title" style="color: var(--green);">🌿 Article</span>
+          <span class="tpl-sub">verdict, category, heroImage</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="commands" style="margin-top: 16px;">
+      <h2>📌 Категории в Здраве &amp; Красота</h2>
+      <div style="font-family: var(--mono); font-size: 13px; color: var(--muted); line-height: 1.9;">
+        <code style="color: var(--green);">Митове и факти</code> ·
+        <code style="color: var(--green);">Здраве</code> ·
+        <code style="color: var(--green);">Красота</code> ·
+        <code style="color: var(--green);">Дълголетие</code> ·
+        <code style="color: var(--green);">Хранене</code> ·
+        <code style="color: var(--green);">Народна медицина</code>
+      </div>
+      <div style="font-family: var(--sans); font-size: 12px; color: var(--muted); margin-top: 10px;">
+        ⚠️ Ако някоя категория не е дефинирана в <code>src/consts.ts</code>, добави я, преди да я използваш.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOOLBAR ===== -->
+  <div class="toolbar" style="margin-top: 24px;">
+    <button class="primary" id="checkBtn">Провери</button>
+    <button class="plain" id="exampleBtn">Пример с грешки</button>
+    <button class="plain" id="clearBtn">Изчисти</button>
+  </div>
+
+  <!-- ===== PANES ===== -->
+  <div class="panes">
+    <div class="pane">
+      <div class="pane-title">Вход (Markdown / front matter)</div>
+      <div class="editor-body">
+        <div class="gutter" id="gutter">1</div>
+        <textarea id="input" spellcheck="false" placeholder="---&#10;title: Моят пост&#10;pubDate: 2026-09-21T10:00:00&#10;---&#10;&#10;Съдържание..."></textarea>
+      </div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-title">Резултат</div>
+      <div class="result-body" id="result">
+        <div class="placeholder">Избери проект, зареди шаблон и натисни „Провери".</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="issues" id="issuesBox" style="display:none">
+    <div class="issues-header">Открити проблеми</div>
+    <div id="issuesList"></div>
+  </div>
+
+</div>
+
+<div id="toast">Копирано!</div>
+
+<script>
+/* ============================================================ */
+/* ШАБЛОНИ ЗА ТРИТЕ ПРОЕКТА                                     */
+/* ============================================================ */
+const TEMPLATES = {
+  linuxdevops: {
+    post: `---
+title: ""
+seoTitle: ""
+description: ""
+pubDate: 2026-09-21T10:00:00
+category: "DevOps"
+tags: []
+author: LinuxDev Team
+draft: true
+featured: false
+readTime: 10 мин
+heroImage: ""
+heroImageAlt: ""
+---
+
+`,
+
+    tutorial: `---
+title: ""
+seoTitle: ""
+description: ""
+pubDate: 2026-09-21T10:00:00
+category: "DevOps"
+level: "Beginner"
+duration: 20 мин
+tags: []
+prerequisites: []
+draft: true
+featured: false
+heroImage: ""
+heroImageAlt: ""
+---
+
+`,
+
+    script: `---
+title: ""
+seoTitle: ""
+description: ""
+pubDate: 2026-09-21T10:00:00
+updatedDate: 2026-09-21T10:00:00
+category: "Automation"
+tags: []
+author: LinuxDev Team
+version: "1.0.0"
+language: bash
+dependencies: []
+usage: ""
+repository: ""
+draft: true
+featured: false
+heroImage: ""
+heroImageAlt: ""
+---
+
+`
+  },
+
+  trainbrakes: {
+    article: `---
+title: ""
+seoTitle: ""
+description: ""
+pubDate: 2026-09-21T10:00:00
+updatedDate: 2026-09-21T10:00:00
+author: "Федя Серафиев"
+category: "Спирачки"
+tags: []
+heroImage: ""
+heroImageAlt: ""
+verdict: ""
+draft: true
+featured: false
+---
+
+`
+  },
+
+  zdravemag: {
+    article: `---
+title: ""
+seoTitle: ""
+description: ""
+pubDate: 2026-09-21T10:00:00
+author: "Екип Здраве & Красота"
+category: "Митове и факти"
+tags: []
+verdict: ""
+heroImage: ""
+heroImageAlt: ""
+draft: true
+featured: false
+---
+
+`
+  }
+};
+
+/* ============================================================ */
+/* STATE                                                        */
+/* ============================================================ */
+let currentProject = 'linuxdevops';
+
+const input = document.getElementById('input');
+const gutter = document.getElementById('gutter');
+const resultEl = document.getElementById('result');
+const statusPill = document.getElementById('statusPill');
+const issuesBox = document.getElementById('issuesBox');
+const issuesList = document.getElementById('issuesList');
+const toast = document.getElementById('toast');
+
+/* ============================================================ */
+/* UI HELPERS                                                   */
+/* ============================================================ */
+function switchProject(project) {
+  currentProject = project;
+
+  // табове
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.project === project);
+  });
+
+  // съдържание
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-' + project);
+  });
+
+  // изчисти редактора при смяна
+  input.value = '';
+  syncGutter();
+  resultEl.innerHTML = '<div class="placeholder">Избери шаблон за ' +
+    (project === 'linuxdevops' ? 'Linux-DevOps' : project === 'trainbrakes' ? 'TrainBrakes' : 'Здраве & Красота') +
+    ' и натисни „Провери".</div>';
+  issuesBox.style.display = 'none';
+  statusPill.className = 'status-pill';
+  statusPill.textContent = 'няма проверка';
+}
+
+function loadTemplate(project, name) {
+  const tpl = TEMPLATES[project] && TEMPLATES[project][name];
+  if (!tpl) return;
+
+  input.value = tpl;
+  syncGutter();
+  render(input.value);
+  input.focus();
+
+  // селектирай стойността след title:
+  const idx = input.value.indexOf('title:') + 8;
+  const end = input.value.indexOf('\n', idx);
+  input.setSelectionRange(idx, end);
+}
+
+function showToast(msg) {
+  toast.textContent = msg || 'Копирано!';
+  toast.className = 'show';
+  setTimeout(() => { toast.className = ''; }, 2000);
+}
+
+function copyCmd(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = '✓ Готово';
+    showToast('Копирано!');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'Копирай';
+    }, 1500);
+  }).catch(err => {
+    console.error('Грешка при копиране:', err);
+  });
+}
+
+/* ============================================================ */
+/* YAML ANALYZER                                                */
+/* ============================================================ */
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function syncGutter() {
+  const lines = input.value.split('\n').length;
+  let out = '';
+  for (let i = 1; i <= lines; i++) out += i + '\n';
+  gutter.textContent = out;
+}
+input.addEventListener('input', syncGutter);
+input.addEventListener('scroll', () => { gutter.scrollTop = input.scrollTop; });
+syncGutter();
+
+const SEV_RANK = { error: 3, warning: 2, info: 1 };
+
+function analyze(text) {
+  const rawLines = text.split('\n');
+  const issues = [];
+
+  function addIssue(line, severity, message) {
+    issues.push({ line, severity, message });
+  }
+
+  if (rawLines.length === 0 || rawLines[0].trim() !== '---') {
+    addIssue(1, 'error', 'Липсва отварящ разделител. Front matter трябва да започва с ред, съдържащ само <code>---</code>.');
+    return { issues, hasBlock: false, rawLines };
+  }
+
+  let closingIdx = -1;
+  for (let i = 1; i < rawLines.length; i++) {
+    if (rawLines[i].trim() === '---') { closingIdx = i; break; }
+  }
+
+  if (closingIdx === -1) {
+    addIssue(1, 'error', 'Липсва затварящ разделител <code>---</code> за front matter блока.');
+    return { issues, hasBlock: false, rawLines };
+  }
+
+  const yamlLines = rawLines.slice(1, closingIdx);
+  const yamlOffset = 1;
+
+  if (yamlLines.every(l => l.trim() === '')) {
+    addIssue(2, 'warning', 'Front matter блокът е празен.');
+  }
+
+  const yamlText = yamlLines.join('\n');
+  try {
+    if (typeof jsyaml !== 'undefined') {
+      jsyaml.load(yamlText);
+    }
+  } catch (e) {
+    let line = 2;
+    if (e && e.mark && typeof e.mark.line === 'number') {
+      line = yamlOffset + e.mark.line + 1;
+    }
+    const reason = (e && e.reason) ? e.reason : (e && e.message) || 'невалиден YAML синтаксис';
+    addIssue(line, 'error', 'YAML синтактична грешка: ' + escapeHtml(reason) + '.');
+  }
+
+  const topKeySeen = {};
+  const keyLineRe = /^([A-Za-z0-9_.\-]+)\s*:(\s|$)/;
+  const listItemRe = /^\s*-\s?/;
+  const blockScalarRe = /:\s*[|>][+-]?\s*$/;
+
+  let inBlockScalar = false;
+  let blockScalarIndent = null;
+
+  yamlLines.forEach((raw, idx) => {
+    const lineNo = yamlOffset + idx + 1;
+    const trimmed = raw.replace(/\r$/, '');
+    const indentMatch = trimmed.match(/^(\s*)/);
+    const indent = indentMatch[1];
+    const content = trimmed.slice(indent.length);
+
+    if (indent.includes('\t')) {
+      addIssue(lineNo, 'error', 'Табулация вместо интервали за отстъп — YAML забранява табове в indentation.');
+    }
+
+    if (/[ \t]+$/.test(trimmed) && trimmed.trim() !== '') {
+      addIssue(lineNo, 'info', 'Излишни интервали в края на реда.');
+    }
+
+    if (content === '') return;
+
+    if (blockScalarRe.test(trimmed)) {
+      inBlockScalar = true;
+      blockScalarIndent = indent.length;
+      return;
+    }
+    if (inBlockScalar) {
+      if (indent.length > blockScalarIndent) return;
+      inBlockScalar = false;
+    }
+
+    if (indent.length === 0 && !listItemRe.test(content) && content !== '---') {
+      const m = content.match(keyLineRe);
+      if (m) {
+        const key = m[1];
+        if (topKeySeen[key] !== undefined) {
+          addIssue(lineNo, 'error', 'Дублиран ключ <code>' + escapeHtml(key) + '</code> (вече дефиниран на ред ' + topKeySeen[key] + ').');
+        } else {
+          topKeySeen[key] = lineNo;
+        }
+
+        const value = content.slice(m[0].length).trim();
+        if ((key === 'pubDate' || key === 'date' || key === 'updatedDate') && value !== '' && !/^["']?\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?.*)?["']?$/.test(value)) {
+          addIssue(lineNo, 'warning', 'Полето <code>' + escapeHtml(key) + '</code> не изглежда във формат ISO 8601 (<code>YYYY-MM-DD</code>).');
+        }
+        if ((key === 'tags' || key === 'categories' || key === 'prerequisites' || key === 'dependencies') && value !== '' && !value.startsWith('[') && value.includes(',')) {
+          addIssue(lineNo, 'info', 'Полето <code>' + escapeHtml(key) + '</code> изглежда като списък, изброен през запетая — по-надеждно е <code>[' + escapeHtml(value) + ']</code> или YAML списък с <code>-</code>.');
+        }
+      } else if (!content.startsWith('#')) {
+        addIssue(lineNo, 'warning', 'Редът не изглежда като валиден <code>ключ: стойност</code> чифт.');
+      }
+    }
+  });
+
+  return { issues, hasBlock: true, rawLines, closingIdx };
+}
+
+function severityForLine(issues, lineNo) {
+  const relevant = issues.filter(i => i.line === lineNo);
+  if (relevant.length === 0) return null;
+  relevant.sort((a, b) => SEV_RANK[b.severity] - SEV_RANK[a.severity]);
+  return relevant;
+}
+
+function render(text) {
+  const { issues, rawLines } = analyze(text);
+
+  const hasError = issues.some(i => i.severity === 'error');
+  const hasWarning = issues.some(i => i.severity === 'warning');
+  statusPill.className = 'status-pill ' + (hasError ? 'err' : hasWarning ? 'warn' : 'ok');
+  statusPill.textContent = hasError
+    ? issues.filter(i => i.severity === 'error').length + ' грешка/и'
+    : hasWarning
+      ? issues.filter(i => i.severity === 'warning').length + ' предупреждение/я'
+      : 'валиден';
+
+  let html = '';
+  rawLines.forEach((raw, idx) => {
+    const lineNo = idx + 1;
+    const lineIssues = severityForLine(issues, lineNo);
+    const topSev = lineIssues ? lineIssues[0].severity : null;
+    const sevClass = topSev ? 'sev-' + topSev : '';
+    html += '<div class="code-line ' + sevClass + '"><div class="ln">' + lineNo + '</div><div class="content">' + (escapeHtml(raw) || '&nbsp;') + '</div></div>';
+    if (lineIssues) {
+      lineIssues.forEach(iss => {
+        const label = iss.severity === 'error' ? 'грешка' : iss.severity === 'warning' ? 'внимание' : 'бележка';
+        html += '<div class="annotation ' + iss.severity + '"><span class="tag">' + label + '</span><span>' + iss.message + '</span></div>';
+      });
+    }
+  });
+  resultEl.innerHTML = html || '<div class="placeholder">Няма съдържание.</div>';
+
+  if (issues.length === 0) {
+    issuesBox.style.display = 'none';
+  } else {
+    issuesBox.style.display = 'block';
+    const sorted = [...issues].sort((a, b) => a.line - b.line || SEV_RANK[b.severity] - SEV_RANK[a.severity]);
+    issuesList.innerHTML = sorted.map(i => {
+      const label = i.severity === 'error' ? 'грешка' : i.severity === 'warning' ? 'внимание' : 'бележка';
+      return '<div class="issue-row ' + i.severity + '"><span class="badge">' + label + '</span><span class="loc">ред ' + i.line + '</span><span class="msg">' + i.message + '</span></div>';
+    }).join('');
+  }
+}
+
+/* ============================================================ */
+/* BUTTONS                                                      */
+/* ============================================================ */
+document.getElementById('checkBtn').addEventListener('click', () => render(input.value));
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  input.value = '';
+  syncGutter();
+  resultEl.innerHTML = '<div class="placeholder">Натисни „Провери", за да видиш анализа.</div>';
+  issuesBox.style.display = 'none';
+  statusPill.className = 'status-pill';
+  statusPill.textContent = 'няма проверка';
+});
+
+document.getElementById('exampleBtn').addEventListener('click', () => {
+  input.value = `---
+title: Пример със грешки
+pubDate: 15-01-2024
+tags: bg, yaml, test
+	author: Иван
+draft false
+title: Дублиран ключ
+---
+
+Съдържание тук.`;
+  syncGutter();
+  render(input.value);
+});
+
+/* ============================================================ */
+/* INIT                                                         */
+/* ============================================================ */
+// зареди примерен шаблон за Linux-DevOps
+loadTemplate('linuxdevops', 'post');
+</script>
+</body>
+</html>
