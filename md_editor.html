@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<title>Markdown редактор</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E👨‍💻%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg:        #1e1e24;
+    --bg-soft:   #26262e;
+    --bg-toolbar:#2b2b34;
+    --border:    #3a3a46;
+    --text:      #e6e6ea;
+    --text-dim:  #a0a0ac;
+    --accent:    #7aa2f7;
+    --code-bg:   #16161c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ---------- Toolbar ---------- */
+  #toolbar {
+    padding: 8px;
+    background: var(--bg-toolbar);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  #toolbar button {
+    padding: 6px 10px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1;
+    transition: background .12s, border-color .12s;
+  }
+  #toolbar button:hover { background: #34343f; border-color: #4a4a58; }
+  #toolbar button:active { background: #3d3d4a; }
+  #toolbar input[type="color"] {
+    width: 34px; height: 30px; padding: 0;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #toolbar .spacer { flex: 1; }
+  #downloadBtn {
+    background: var(--accent) !important;
+    color: #10131a !important;
+    border-color: var(--accent) !important;
+    font-weight: 600;
+  }
+  #downloadBtn:hover { filter: brightness(1.1); }
+
+  /* ---------- Split ---------- */
+  #split { flex: 1; display: flex; min-height: 0; }
+
+  #editor {
+    width: 50%;
+    padding: 14px 16px;
+    border: none;
+    border-right: 1px solid var(--border);
+    resize: none;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.55;
+    outline: none;
+    tab-size: 2;
+  }
+  #editor::placeholder { color: var(--text-dim); }
+
+  #preview {
+    width: 50%;
+    padding: 14px 20px;
+    overflow: auto;
+    background: var(--bg-soft);
+    line-height: 1.6;
+  }
+  #preview img { max-width: 100%; border-radius: 6px; }
+  #preview h1, #preview h2, #preview h3 { border-bottom: 1px solid var(--border); padding-bottom: .25em; }
+  #preview a { color: var(--accent); }
+  #preview code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-size: .92em;
+  }
+  #preview pre {
+    background: var(--code-bg);
+    padding: 12px;
+    border-radius: 8px;
+    overflow: auto;
+    border: 1px solid var(--border);
+  }
+  #preview pre code { background: transparent; padding: 0; }
+  #preview blockquote {
+    border-left: 4px solid var(--accent);
+    margin-left: 0;
+    padding: 8px 14px;
+    color: var(--text-dim);
+    background: rgba(122, 162, 247, 0.08);
+    border-radius: 0 6px 6px 0;
+  }
+  #preview blockquote strong { color: var(--text); }
+  #preview table { border-collapse: collapse; }
+  #preview th, #preview td { border: 1px solid var(--border); padding: 6px 10px; }
+  #preview hr { border: none; border-top: 1px solid var(--border); }
+
+  #preview::-webkit-scrollbar, #editor::-webkit-scrollbar { width: 10px; }
+  #preview::-webkit-scrollbar-thumb, #editor::-webkit-scrollbar-thumb {
+    background: #3a3a46; border-radius: 5px;
+  }
+
+  /* ---------- Модален диалог ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg-toolbar);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    width: 480px;
+    max-width: 92vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal h3 { margin: 0 0 16px; font-size: 17px; }
+
+  .modal label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin: 10px 0 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .modal input[type="text"] {
+    width: 100%;
+    padding: 9px 11px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  .modal input[type="text"]:focus { border-color: var(--accent); }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 18px;
+  }
+  .modal-actions .spacer { flex: 1; }
+
+  .modal .btn-primary {
+    background: var(--accent);
+    color: #10131a;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .modal .btn-primary:hover { filter: brightness(1.1); }
+
+  .modal .btn-secondary {
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .modal .btn-secondary:hover { background: #34343f; }
+
+  .modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0 0;
+    max-height: 150px;
+    overflow: auto;
+  }
+  .modal-list li {
+    padding: 6px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+  }
+  .modal-list li button {
+    background: transparent;
+    border: none;
+    color: #e06c75;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+  }
+  .modal-list li .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .modal-list li .u { color: var(--text-dim); font-size: 11px; }
+  
+  
+  
+  
+  #toolbar .toolbar-link {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background .12s, border-color .12s;
+  }
+  #toolbar .toolbar-link:hover {
+    background: #34343f;
+    border-color: #4a4a58;
+  }
+  #toolbar .toolbar-link:active {
+    background: #3d3d4a;
+  }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button data-md="bold" title="Удебелен (Ctrl+B)"><b>B</b></button>
+  <button data-md="italic" title="Курсив (Ctrl+I)"><i>I</i></button>
+  <button data-md="strike" title="Зачертан"><s>S</s></button>
+  <button data-md="code" title="Код">&lt;/&gt;</button>
+  <button data-md="h1">H1</button>
+  <button data-md="h2">H2</button>
+  <button data-md="ul">• Списък</button>
+  <button data-md="ol">1. Списък</button>
+  <button data-md="quote">❝</button>
+  <button data-md="link" title="Линк (Ctrl+K)">🔗</button>
+  <button data-md="image" title="Локална картинка">🖼️</button>
+  <button data-md="imageUrl" title="Картинка по URL">🌐🖼️</button>
+  <button data-md="recommend" title="Препоръка с линк">💡 Препоръка</button>
+  <button data-md="hr">—</button>
+  <input type="color" id="colorPicker" value="#e11d48" title="Цвят на текста">
+  <button data-md="color">Цвят</button>
+  <button id="clearColor">Махни цвят</button>
+
+  <span class="spacer"></span>
+  
+    <a href="https://dev.fedia.eu/" target="_blank" rel="noopener" class="toolbar-link">
+    <span>🛠️ Към Dev Tools</span>
+  </a>
+  
+  <button id="downloadBtn" title="Свали като .md файл">⬇ Свали .md</button>
+</div>
+
+<div id="split">
+  <textarea id="editor" placeholder="Пиши Markdown тук..." spellcheck="false"></textarea>
+  <div id="preview"></div>
+</div>
+
+<!-- Модален диалог за препоръка -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+    <h3>💡 Добави препоръка</h3>
+
+    <label>Заглавие</label>
+    <input type="text" id="modalTitle" placeholder="Заглавие на статията">
+
+    <label>URL</label>
+    <input type="text" id="modalUrl" placeholder="https://...">
+
+    <div class="modal-actions">
+      <button id="modalAddMore" class="btn-secondary">+ Още една</button>
+      <span class="spacer"></span>
+      <button id="modalCancel" class="btn-secondary">Отказ</button>
+      <button id="modalInsert" class="btn-primary">Вмъкни</button>
+    </div>
+
+    <ul id="modalList" class="modal-list"></ul>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+const editor  = document.getElementById('editor');
+const preview = document.getElementById('preview');
+const colorPicker = document.getElementById('colorPicker');
+
+/* ---------- 1. Рендиране ---------- */
+marked.setOptions({ breaks: true, gfm: true });
+
+function render() {
+  preview.innerHTML = marked.parse(editor.value);
+}
+editor.addEventListener('input', render);
+
+/* ---------- 2. Помощни функции ---------- */
+
+function getSel() {
+  return { s: editor.selectionStart, e: editor.selectionEnd };
+}
+
+function restore(s, e) {
+  editor.focus({ preventScroll: true });
+  editor.setSelectionRange(s, e);
+}
+
+function surround(before, after = before, placeholder = '') {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const sel = text.slice(s, e) || placeholder;
+  editor.value = text.slice(0, s) + before + sel + after + text.slice(e);
+  render();
+  restore(s + before.length, s + before.length + sel.length);
+}
+
+function prefixLines(prefix) {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const startLine = text.lastIndexOf('\n', s - 1) + 1;
+  const endIdx = text.indexOf('\n', e);
+  const endLine = endIdx === -1 ? text.length : endIdx;
+  const block = text.slice(startLine, endLine);
+  const newBlock = block.split('\n').map(l => prefix + l).join('\n');
+  editor.value = text.slice(0, startLine) + newBlock + text.slice(endLine);
+  render();
+  restore(startLine, startLine + newBlock.length);
+}
+
+function applyColor(color) {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const sel = text.slice(s, e);
+  if (!sel) { alert('Маркирай текст, който да оцветиш.'); return; }
+  const wrapped = `<span style="color:${color}">${sel}</span>`;
+  editor.value = text.slice(0, s) + wrapped + text.slice(e);
+  render();
+  restore(s, s + wrapped.length);
+}
+
+function clearColorFromSelection() {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const sel = text.slice(s, e);
+  if (!sel) return;
+  const cleaned = sel.replace(/<span\s+style="color:[^"]*">([\s\S]*?)<\/span>/g, '$1');
+  editor.value = text.slice(0, s) + cleaned + text.slice(e);
+  render();
+  restore(s, s + cleaned.length);
+}
+
+/* ---------- 3. Линкове и картинки ---------- */
+
+function insertLink() {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const sel = text.slice(s, e) || 'текст';
+  const result = `[${sel}](https://)`;
+  editor.value = text.slice(0, s) + result + text.slice(e);
+  render();
+  const urlStart = s + 1 + sel.length + 2;
+  restore(urlStart, urlStart + 8);
+}
+
+function insertLocalImage() {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const sel = text.slice(s, e) || 'текст';
+
+  const filename = prompt('Име на файла (напр. снимка.webp):', 'име.webp');
+  if (filename === null) return;
+
+  const clean = filename.trim().replace(/^\/+/, '');
+  const path = `/images/${clean || 'име.webp'}`;
+  const result = `![${sel}](${path})`;
+
+  editor.value = text.slice(0, s) + result + text.slice(e);
+  render();
+  const pathStart = s + 2 + sel.length + 2;
+  restore(pathStart, pathStart + path.length);
+}
+
+function insertImageUrl() {
+  const { s, e } = getSel();
+  const text = editor.value;
+  const sel = text.slice(s, e) || 'текст';
+  const result = `![${sel}](https://)`;
+  editor.value = text.slice(0, s) + result + text.slice(e);
+  render();
+  const urlStart = s + 2 + sel.length + 2;
+  restore(urlStart, urlStart + 8);
+}
+
+/* ---------- 4. Препоръка чрез модален диалог ---------- */
+
+const modalOverlay = document.getElementById('modalOverlay');
+const modalTitle   = document.getElementById('modalTitle');
+const modalUrl     = document.getElementById('modalUrl');
+const modalList    = document.getElementById('modalList');
+
+let recommendItems = [];
+
+function openRecommendModal() {
+  recommendItems = [];
+
+  const { s, e } = getSel();
+  const sel = editor.value.slice(s, e).trim();
+  modalTitle.value = sel;
+  modalUrl.value = 'https://';
+
+  renderModalList();
+  modalOverlay.classList.add('open');
+  setTimeout(() => modalTitle.focus(), 50);
+}
+
+function closeRecommendModal() {
+  modalOverlay.classList.remove('open');
+  editor.focus({ preventScroll: true });
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function renderModalList() {
+  modalList.innerHTML = '';
+  recommendItems.forEach((it, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div>
+        <div class="t">${escapeHtml(it.title)}</div>
+        <div class="u">${escapeHtml(it.url)}</div>
+      </div>
+      <button data-i="${i}" title="Махни">✕</button>
+    `;
+    modalList.appendChild(li);
+  });
+  modalList.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      recommendItems.splice(+b.dataset.i, 1);
+      renderModalList();
+    });
+  });
+}
+
+function captureCurrentFields() {
+  const t = modalTitle.value.trim();
+  const u = modalUrl.value.trim();
+  if (t && u && u !== 'https://') {
+    recommendItems.push({ title: t, url: u });
+  }
+}
+
+function insertFromModal() {
+  captureCurrentFields();
+
+  if (recommendItems.length === 0) {
+    alert('Попълни поне едно заглавие и URL.');
+    return;
+  }
+
+  const { s, e } = getSel();
+  const text = editor.value;
+
+  let block;
+  if (recommendItems.length === 1) {
+    const it = recommendItems[0];
+    block = `\n> **Може да ви е интересно още:** [${it.title}](${it.url})\n`;
+  } else {
+    const lines = recommendItems.map(it => `> - [${it.title}](${it.url})`).join('\n');
+    block = `\n> **Може да ви е интересно още:**\n${lines}\n`;
+  }
+
+  editor.value = text.slice(0, s) + block + text.slice(e);
+  render();
+  const end = s + block.length;
+  restore(end, end);
+  closeRecommendModal();
+}
+
+function addAnother() {
+  const t = modalTitle.value.trim();
+  const u = modalUrl.value.trim();
+  if (!t || !u || u === 'https://') {
+    alert('Попълни заглавие и URL преди да добавиш още.');
+    return;
+  }
+  recommendItems.push({ title: t, url: u });
+  renderModalList();
+  modalTitle.value = '';
+  modalUrl.value = 'https://';
+  modalTitle.focus();
+}
+
+document.getElementById('modalInsert').addEventListener('click', insertFromModal);
+document.getElementById('modalAddMore').addEventListener('click', addAnother);
+document.getElementById('modalCancel').addEventListener('click', closeRecommendModal);
+
+modalOverlay.addEventListener('click', ev => {
+  if (ev.target === modalOverlay) closeRecommendModal();
+});
+
+modalOverlay.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') closeRecommendModal();
+  if (ev.key === 'Enter' && !ev.shiftKey) {
+    ev.preventDefault();
+    insertFromModal();
+  }
+});
+
+/* ---------- 5. Toolbar бутони ---------- */
+document.querySelectorAll('#toolbar button').forEach(btn => {
+  btn.addEventListener('mousedown', ev => ev.preventDefault());
+});
+
+document.querySelectorAll('#toolbar button[data-md]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    switch (btn.dataset.md) {
+      case 'bold':      surround('**', '**', 'удебелен'); break;
+      case 'italic':    surround('*',  '*',  'курсив');   break;
+      case 'strike':    surround('~~', '~~', 'зачертан'); break;
+      case 'code':      surround('`',  '`',  'код');      break;
+      case 'h1':        prefixLines('# ');   break;
+      case 'h2':        prefixLines('## ');  break;
+      case 'ul':        prefixLines('- ');   break;
+      case 'ol':        prefixLines('1. ');  break;
+      case 'quote':     prefixLines('> ');   break;
+      case 'hr':        surround('\n---\n', '', ''); break;
+      case 'link':      insertLink();        break;
+      case 'image':     insertLocalImage();  break;
+      case 'imageUrl':  insertImageUrl();    break;
+      case 'recommend': openRecommendModal(); break;
+      case 'color':     applyColor(colorPicker.value); break;
+    }
+  });
+});
+
+document.getElementById('clearColor').addEventListener('click', clearColorFromSelection);
+
+/* ---------- 6. Сваляне като .md ---------- */
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const blob = new Blob([editor.value], { type: 'text/markdown;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+
+  const firstHeading = editor.value.match(/^#\s+(.+)$/m);
+  let name = firstHeading ? firstHeading[1].trim() : 'документ';
+  name = name.replace(/[\\/:*?"<>|]/g, '_').slice(0, 60) || 'документ';
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name + '.md';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+/* ---------- 7. Клавишни комбинации ---------- */
+editor.addEventListener('keydown', ev => {
+  if (!(ev.ctrlKey || ev.metaKey)) return;
+  const k = ev.key.toLowerCase();
+  if (k === 'b')      { ev.preventDefault(); surround('**', '**', 'удебелен'); }
+  else if (k === 'i') { ev.preventDefault(); surround('*', '*', 'курсив'); }
+  else if (k === 'k') { ev.preventDefault(); insertLink(); }
+});
+
+/* ---------- 8. Начален пример ---------- */
+editor.value = `# Заглавие
+
+Това е **удебелен** текст и *курсив*.
+
+- точка 1
+- точка 2
+
+<span style="color:#e11d48">Червен текст</span>
+
+> **Може да ви е интересно още:** [Примерна статия](https://example.com)
+
+![Примерна картинка](/images/име.webp)
+`;
+render();
+</script>
+</body>
+</html>
