@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bash Prompt Генератор v3</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1220'/%3E%3Ctext x='5' y='25' font-family='monospace' font-size='24' font-weight='700' fill='%234cae85'%3E%E2%9D%AF%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#e8ecf2; --surface:#f7f9fc; --ink:#131926; --muted:#545f74; --line:#d0d8e4;
+  --accent:#c4460c; --accent-ink:#ffffff; --field:#ffffff; --hover:#eaeef5;
+  --term-bg:#0d1220; --term-bar:#161d30; --term-ink:#d3dbec; --term-dim:#7683a0;
+  --code-bg:#0d1220; --code-ink:#cfd8ea; --code-cm:#6f7c99;
+  --f-display:"Unbounded","Onest",system-ui,sans-serif;
+  --f-body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#090c14; --surface:#121726; --ink:#e7ecf6; --muted:#9aa5bd; --line:#232b40;
+    --accent:#ff9055; --accent-ink:#1b0f07; --field:#0d1220; --hover:#1a2136;
+    --term-bg:#04060b; --term-bar:#0e131f; --term-ink:#d3dbec; --term-dim:#6d7a97;
+    --code-bg:#04060b; --code-ink:#cfd8ea; --code-cm:#657290;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#090c14; --surface:#121726; --ink:#e7ecf6; --muted:#9aa5bd; --line:#232b40;
+  --accent:#ff9055; --accent-ink:#1b0f07; --field:#0d1220; --hover:#1a2136;
+  --term-bg:#04060b; --term-bar:#0e131f; --term-ink:#d3dbec; --term-dim:#6d7a97;
+  --code-bg:#04060b; --code-ink:#cfd8ea; --code-cm:#657290;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-inline:16px;margin:0}
+.wrap{max-width:1180px;margin-inline:auto;padding-block:28px 56px}
+header{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.h-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(22px,4.2vw,34px);line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:60ch}
+h2{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+code,pre,.mono{font-family:var(--f-mono)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.controls,.stage{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (min-width:901px){
+  .grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}
+  .controls{order:-1}
+}
+@media (min-width:901px) and (min-height:780px){
+  .stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.hint{margin:-4px 0 12px;color:var(--muted);font-size:13px}
+.icon-btn{width:38px;height:38px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.icon-btn:hover{background:var(--hover)}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* Presets */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip:hover{background:var(--hover)}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+
+/* Segment rows */
+.segs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--field);transition:opacity .15s,transform .15s}
+.row.dragging{opacity:.4}
+.row.drag-over{border-color:var(--accent);transform:scale(1.01)}
+.row .drag{color:var(--muted);cursor:grab;font-size:14px;user-select:none;padding:2px;line-height:1}
+.row .drag:active{cursor:grabbing}
+.row label{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0;cursor:pointer}
+.row .nm{font-weight:500}
+.row code{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.row.sub{grid-template-columns:auto 1fr auto;padding:6px 10px 6px 42px;background:color-mix(in srgb, var(--field) 92%, var(--hover))}
+.row.sub .sub-label{font-size:12px;color:var(--muted)}
+.split-colors{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.split-colors label{display:flex;gap:5px;align-items:center;font-size:13px;color:var(--ink);cursor:pointer}
+.split-colors input[type=color]{width:30px;height:30px}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0}
+input[type=color]{width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--field);cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:3px}
+input[type=color]::-webkit-color-swatch{border:0;border-radius:5px}
+input[type=color]::-moz-color-swatch{border:0;border-radius:5px}
+.color-wrap{position:relative}
+.color-256{position:absolute;top:-6px;right:-6px;background:var(--surface);border:1px solid var(--line);border-radius:4px;font-size:9px;padding:1px 3px;color:var(--muted);pointer-events:none;font-family:var(--f-mono);display:none}
+.row.show-256 .color-256{display:block}
+.mv{display:flex;gap:4px}
+.mv button{width:30px;height:30px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer;line-height:1}
+.mv button:hover:not(:disabled){background:var(--hover)}
+.mv button:disabled{opacity:.35;cursor:default}
+
+/* Appearance controls */
+.ctl{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--field);max-width:100%;flex-wrap:wrap}
+.ctl button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:8px 14px;cursor:pointer;border-right:1px solid var(--line)}
+.ctl button:last-child{border-right:0}
+.ctl button:hover{background:var(--hover)}
+.ctl button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 18px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>span{font-size:12.5px;color:var(--muted)}
+select{font:inherit;font-size:14px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%}
+.chk{display:flex;align-items:flex-start;gap:10px;font-size:14px;cursor:pointer;min-width:0}
+.chk input{margin-top:2px;flex:none}
+.chk code{font-size:12px;color:var(--muted)}
+.sep-label{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+
+/* Terminal */
+.term{background:var(--term-bg);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.term-bar{display:flex;justify-content:space-between;gap:10px;background:var(--term-bar);color:var(--term-dim);font-family:var(--f-mono);font-size:11.5px;padding:8px 14px}
+.term-body{padding:16px 16px 18px;font-family:var(--f-mono);font-size:13.5px;line-height:1.7;color:var(--term-ink);overflow-x:auto;min-height:118px}
+.dim{color:var(--term-dim);white-space:pre}
+.line{display:flex;align-items:center;min-height:1.75em;white-space:pre;width:max-content}
+.ps{display:flex;align-items:stretch}
+.blk{display:inline-flex;align-items:center;height:1.75em;padding:0 1ch;white-space:pre}
+.blk.b,.tx.b,.sym.b{font-weight:700}
+.sep{display:block;width:1.1ch;background:var(--b,transparent)}
+.sep::before{content:"";display:block;width:100%;height:100%;background:var(--a);clip-path:polygon(0 0,100% 50%,0 100%)}
+.sep.round{width:1ch}
+.sep.round::before{clip-path:none;border-radius:0 999px 999px 0}
+.sep.lower::before{clip-path:polygon(0 100%,100% 50%,0 0)}
+.sep.diag::before{clip-path:polygon(0 0,100% 0,0 100%)}
+.gap{display:inline-block;width:1ch}
+.ico{display:inline-block;vertical-align:-1px;margin-right:.3ch}
+.cur{display:inline-block;width:.6em;height:1.15em;background:var(--term-ink);margin-left:2px;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cur{animation:none}}
+.empty{padding:24px 8px;text-align:center;color:var(--term-dim);font-size:13px;font-family:var(--f-body)}
+.sim{display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 14px;border-top:1px solid var(--line);background:var(--surface);align-items:center}
+.sim>span{font-size:12px;color:var(--muted);margin-right:2px}
+.sim label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+
+/* Output */
+.out-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.out-head h2{margin:0}
+.btn{font:inherit;font-weight:600;font-size:14px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:9px;padding:9px 18px;cursor:pointer}
+.btn:hover{filter:brightness(1.07)}
+.btn.secondary{background:var(--field);color:var(--ink);border:1px solid var(--line)}
+.btn.secondary:hover{background:var(--hover);filter:none}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.6;overflow:auto;max-height:380px;tab-size:2}
+pre code{font-family:var(--f-mono)}
+.cm{color:var(--code-cm)}
+.notes{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.notes li{padding-left:14px;position:relative}
+.notes li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:1px;background:var(--accent)}
+.notes code{font-size:12px;color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:9px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="h-row">
+      <div style="flex:1;min-width:0">
+        <h1>Bash Prompt Генератор <span style="font-size:.6em;color:var(--accent);font-weight:500">v3</span></h1>
+        <p style="margin-top:8px">Подреди сегментите, виж резултата в терминал и копирай готовия скрипт за <code>~/.bashrc</code>.</p>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Превключи тема" title="Тема">🌙</button>
+        <a href="https://dev.fedia.eu/" style="text-decoration:none">
+          <button class="btn secondary" type="button">🛠️ dev.fedia.eu</button>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="stage" aria-label="Преглед и резултат">
+      <div class="term">
+        <div class="term-bar"><span>bash — admin@srv-sof01</span><span id="termInfo">PS1 · преглед</span></div>
+        <div class="term-body" id="term" aria-live="polite" aria-label="Преглед на промпта"></div>
+        <div class="sim" role="group" aria-label="Симулирано състояние">
+          <span>Състояние:</span>
+          <label><input type="checkbox" data-s="git"> Git</label>
+          <label><input type="checkbox" data-s="ssh"> SSH</label>
+          <label><input type="checkbox" data-s="fail"> Грешка</label>
+          <label><input type="checkbox" data-s="venv"> venv</label>
+          <label><input type="checkbox" data-s="jobs"> Фонови</label>
+          <label><input type="checkbox" data-s="k8s"> K8s</label>
+          <label><input type="checkbox" data-s="tf"> TF</label>
+          <label><input type="checkbox" data-s="hist"> История</label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="out-head">
+          <h2 id="outTitle">Скрипт за ~/.bashrc</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn secondary" id="exportBtn" type="button" title="Свали конфигурацията като JSON">💾</button>
+            <button class="btn secondary" id="importBtn" type="button" title="Зареди конфигурация от JSON">📂</button>
+            <input type="file" id="importFile" accept="application/json,.json" hidden>
+            <button class="btn secondary" id="shareBtn" type="button" title="Копирай линк с конфигурацията">🔗</button>
+            <button class="btn" id="copy" type="button">Копирай</button>
+          </div>
+        </div>
+        <pre tabindex="0" aria-labelledby="outTitle" aria-live="polite"><code id="out"></code></pre>
+        <ul class="notes" id="notes"></ul>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Настройки">
+      <div class="panel">
+        <h2>Готови стилове</h2>
+        <div class="chips" id="presets"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Сегменти</h2>
+        <p class="hint">Включи, оцвети и подреди (влачи или ↑/↓). Цветът на текста се подбира автоматично за контраст.</p>
+        <ul class="segs" id="segs"></ul>
+      </div>
+
+      <div class="panel stack">
+        <h2 style="margin-bottom:0">Външен вид</h2>
+        <div>
+          <div class="sep-label">Стил на сегментите</div>
+          <div class="ctl" id="styleCtl" role="group" aria-label="Стил на сегментите">
+            <button type="button" data-style="powerline">Powerline</button>
+            <button type="button" data-style="blocks">Блокове</button>
+            <button type="button" data-style="text">Цветен текст</button>
+            <button type="button" data-style="brackets">Скоби</button>
+          </div>
+        </div>
+        <div id="shapeWrap">
+          <div class="sep-label">Форма на разделителя</div>
+          <div class="ctl" id="shapeCtl" role="group" aria-label="Форма на разделителя">
+            <button type="button" data-shape="arrow">▲ Стрелка</button>
+            <button type="button" data-shape="round">◗ Заоблен</button>
+            <button type="button" data-shape="lower">▼ Долен</button>
+            <button type="button" data-shape="diag">◣ Диагонал</button>
+          </div>
+        </div>
+        <div class="fields">
+          <label class="fld"><span>Символ на промпта</span>
+            <select id="k-sym" data-k="sym">
+              <option value="$">$ (# за root)</option>
+              <option value="❯">❯</option>
+              <option value="›">›</option>
+              <option value="λ">λ</option>
+              <option value="→">→</option>
+              <option value="➜">➜</option>
+            </select></label>
+          <label class="fld"><span>Цвят на символа</span>
+            <input type="color" id="k-symColor" data-k="symColor"></label>
+          <label class="fld"><span>Формат на часа</span>
+            <select id="k-timeFmt" data-k="timeFmt">
+              <option value="A">24ч · ЧЧ:ММ</option>
+              <option value="t">24ч · ЧЧ:ММ:СС</option>
+              <option value="T">12ч · ЧЧ:ММ:СС</option>
+              <option value="@">12ч · AM/PM</option>
+              <option value="+%H:%M:%S %Z">24ч с timezone</option>
+            </select></label>
+          <label class="fld"><span>Цветова дълбочина</span>
+            <select id="k-truecolor" data-k="truecolor" data-type="bool">
+              <option value="1">24-bit (truecolor)</option>
+              <option value="0">256 цвята</option>
+            </select></label>
+        </div>
+        <div class="stack" style="gap:10px">
+          <label class="chk"><input type="checkbox" id="k-newline" data-k="newline"><span>Символът на нов ред</span></label>
+          <label class="chk"><input type="checkbox" id="k-symErr" data-k="symErr"><span>Символът става червен при грешка <code>$?</code></span></label>
+          <label class="chk"><input type="checkbox" id="k-bold" data-k="bold"><span>Удебелен текст</span></label>
+          <label class="chk"><input type="checkbox" id="k-cwdBase" data-k="cwdBase"><span>Само името на директорията <code>\W</code></span></label>
+          <label class="chk"><input type="checkbox" id="k-dirtrim" data-k="dirtrim"><span>Съкрати дълги пътища <code>PROMPT_DIRTRIM=3</code></span></label>
+          <label class="chk"><input type="checkbox" id="k-sshOnly" data-k="sshOnly"><span>user@host само през SSH <code>$SSH_CONNECTION</code></span></label>
+          <label class="chk"><input type="checkbox" id="k-gitDirty" data-k="gitDirty"><span>Git: ↑↓ и * при промени (по-бавно)</span></label>
+          <label class="chk"><input type="checkbox" id="k-duration" data-k="duration"><span>Показвай време за изпълнение на командата</span></label>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Bash шаблони -->
+<script type="text/plain" id="t-h-powerline">
+__ps1_seg() {  # $1 fg, $2 bg, $3 text, $4 (opt) guard
+  [[ $# -ge 4 && -z $4 ]] && return
+  [[ -n $__ps1_prev ]] && __ps1_out+="\[\e[38;${__ps1_prev};48;${2}m\]${__ps1_sep}"
+  __ps1_out+="\[\e[{{B}}38;${1};48;${2}m\] ${3} "
+  __ps1_prev=$2
+  __ps1_any=1
+}
+__ps1_seg_rich() {  # $1 bg, $2 guard, $3 uColor, $4 atColor, $5 hColor
+  [[ $# -ge 2 && -z $2 ]] && return
+  [[ -n $__ps1_prev ]] && __ps1_out+="\[\e[38;${__ps1_prev};48;${1}m\]${__ps1_sep}"
+  __ps1_out+="\[\e[{{B}}38;${3};48;${1}m\] \u\[\e[{{B}}38;${4};48;${1}m\]@\[\e[{{B}}38;${5};48;${1}m\]\h "
+  __ps1_prev=$1
+  __ps1_any=1
+}
+</script>
+<script type="text/plain" id="t-h-blocks">
+__ps1_seg() {  # $1 fg, $2 bg, $3 text, $4 (opt) guard
+  [[ $# -ge 4 && -z $4 ]] && return
+  __ps1_out+="\[\e[{{B}}38;${1};48;${2}m\] ${3} \[\e[0m\] "
+  __ps1_any=1
+}
+__ps1_seg_rich() {  # $1 bg, $2 guard, $3 uColor, $4 atColor, $5 hColor
+  [[ $# -ge 2 && -z $2 ]] && return
+  __ps1_out+="\[\e[{{B}}38;${3};48;${1}m\] \u\[\e[{{B}}38;${4};48;${1}m\]@\[\e[{{B}}38;${5};48;${1}m\]\h \[\e[0m\] "
+  __ps1_any=1
+}
+</script>
+<script type="text/plain" id="t-h-text">
+__ps1_seg() {  # $1 color, $2 (bg, unused), $3 text, $4 (opt) guard
+  [[ $# -ge 4 && -z $4 ]] && return
+  __ps1_out+="\[\e[{{B}}38;${1}m\]${3}\[\e[0m\] "
+  __ps1_any=1
+}
+__ps1_seg_rich() {  # $1 bg, $2 guard, $3 uColor, $4 atColor, $5 hColor
+  [[ $# -ge 2 && -z $2 ]] && return
+  __ps1_out+="\[\e[{{B}}38;${3}m\]\u\[\e[{{B}}38;${4}m\]@\[\e[{{B}}38;${5}m\]\h\[\e[0m\] "
+  __ps1_any=1
+}
+</script>
+<script type="text/plain" id="t-h-brackets">
+__ps1_seg() {  # $1 color, $2 (bg, unused), $3 text, $4 (opt) guard
+  [[ $# -ge 4 && -z $4 ]] && return
+  __ps1_out+="\[\e[{{B}}38;${1}m\][${3}]\[\e[0m\] "
+  __ps1_any=1
+}
+__ps1_seg_rich() {  # $1 bg, $2 guard, $3 uColor, $4 atColor, $5 hColor
+  [[ $# -ge 2 && -z $2 ]] && return
+  __ps1_out+="\[\e[{{B}}38;${3}m\][\u\[\e[{{B}}38;${4}m\]@\[\e[{{B}}38;${5}m\]\h]\[\e[0m\] "
+  __ps1_any=1
+}
+</script>
+<script type="text/plain" id="t-c-powerline">
+  [[ -n $__ps1_prev ]] && __ps1_out+="\[\e[0m\e[38;${__ps1_prev}m\]${__ps1_sep}\[\e[0m\]"
+  [[ -n $__ps1_any ]] && __ps1_out+='{{JOIN}}'
+</script>
+<script type="text/plain" id="t-c-flat">
+  [[ -n $__ps1_any ]] && __ps1_out+='\n'
+</script>
+<script type="text/plain" id="t-sym">
+  local sym='{{SYM}}' sc='{{SYMCOL}}'
+{{ERRLINE}}
+  __ps1_out+="\[\e[{{B}}38;${sc}m\]${sym}\[\e[0m\] "
+</script>
+
+<script>
+const T = n => (document.getElementById('t-' + n) || { textContent: '' }).textContent.replace(/^\n|\n$/g, '');
+
+/*GEN_START*/
+const DYN = ['git', 'venv', 'jobs', 'status', 'k8s', 'tf', 'duration', 'exithist'];
+const LV = [0, 95, 135, 175, 215, 255];
+
+function hex2rgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function near(v) { let bi = 0, bd = 1e9; LV.forEach((l, i) => { const d = Math.abs(l - v); if (d < bd) { bd = d; bi = i; } }); return bi; }
+function to256(r, g, b) {
+  const ri = near(r), gi = near(g), bi = near(b);
+  const dc = (r - LV[ri]) ** 2 + (g - LV[gi]) ** 2 + (b - LV[bi]) ** 2;
+  const gk = Math.min(23, Math.max(0, Math.round(((r + g + b) / 3 - 8) / 10))), gv = 8 + gk * 10;
+  const dg = (r - gv) ** 2 + (g - gv) ** 2 + (b - gv) ** 2;
+  return dg < dc ? 232 + gk : 16 + 36 * ri + 6 * gi + bi;
+}
+function sgr(hex, cfg) { const [r, g, b] = hex2rgb(hex); return cfg.truecolor ? '2;' + r + ';' + g + ';' + b : '5;' + to256(r, g, b); }
+function lum(hex) { const c = hex2rgb(hex).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
+function textOn(hex) { const L = lum(hex); return (L + .05) / (.009 + .05) > (.93 + .05) / (L + .05) ? '#10141c' : '#f6f8fc'; }
+function fill(s, m) { return s.replace(/\{\{(\w+)\}\}/g, (_, k) => (m[k] !== undefined ? m[k] : '')); }
+
+const SEP_MAP = {
+  arrow: '\\xee\\x82\\xb0',
+  round: '\\xee\\x82\\xb4',
+  lower: '\\xee\\x82\\xb6',
+  diag:  '\\xee\\x82\\xba'
+};
+const TIME_MAP = { A: '\\A', t: '\\t', T: '\\T', '@': '\\@' };
+
+function spec(id, cfg) {
+  switch (id) {
+    case 'userhost':
+      if (cfg.userhostSplit) return {
+        text: '\\u@\\h',
+        guard: cfg.sshOnly ? '$SSH_CONNECTION' : '',
+        _rich: true,
+        uColor: cfg.colors.user,
+        atColor: cfg.colors.at,
+        hColor: cfg.colors.host
+      };
+      return { text: '\\u@\\h', guard: cfg.sshOnly ? '$SSH_CONNECTION' : '' };
+    case 'cwd': return { text: cfg.cwdBase ? '\\W' : '\\w', guard: '' };
+    case 'git': return { text: '${__ps1_git}', guard: '$__ps1_git' };
+    case 'venv': return { text: 'py:${__ps1_venv}', guard: '$__ps1_venv' };
+    case 'jobs': return { text: 'bg:${__ps1_jobs}', guard: '$__ps1_jobs' };
+    case 'time': {
+      const t = TIME_MAP[cfg.timeFmt] || `\\D{${cfg.timeFmt}}`;
+      return { text: t, guard: '' };
+    }
+    case 'status': return { text: '✘ ${__ps1_ec}', guard: '$__ps1_ec' };
+    case 'k8s': return { text: '☸ ${__ps1_k8s}', guard: '$__ps1_k8s' };
+    case 'tf': return { text: 'tf:${__ps1_tf}', guard: '$__ps1_tf' };
+    case 'duration': return { text: '${__ps1_dur}', guard: '$__ps1_dur' };
+    case 'shlvl': return { text: 'sh${SHLVL}', guard: '' };
+    case 'exithist': return { text: '${__ps1_hist}', guard: '$__ps1_hist' };
+  }
+}
+function isDyn(cfg) {
+  const ids = cfg.order.filter(id => cfg.enabled[id]);
+  return ids.some(id => DYN.includes(id)) || (cfg.sshOnly && ids.includes('userhost')) || !!cfg.symErr;
+}
+
+function generate(cfg) {
+  const ids = cfg.order.filter(id => cfg.enabled[id]);
+  const B = cfg.bold ? '1;' : '';
+  const pl = cfg.style === 'powerline';
+  const SEP = SEP_MAP[cfg.sepShape] || SEP_MAP.arrow;
+
+  const items = ids.map(id => {
+    const sp = spec(id, cfg);
+    const c = cfg.colors[id];
+    const out = Object.assign({}, sp, {
+      id,
+      bg: sgr(c, cfg),
+      fg: sgr(textOn(c), cfg)
+    });
+    if (sp._rich) {
+      out.uColor = sgr(sp.uColor, cfg);
+      out.atColor = sgr(sp.atColor, cfg);
+      out.hColor = sgr(sp.hColor, cfg);
+      out._rich = true;
+    }
+    return out;
+  });
+
+  const sym = cfg.sym === '$' ? '\\$' : cfg.sym;
+  const symc = sgr(cfg.symColor, cfg), errc = sgr('#ff5f5f', cfg);
+  const head = ['# Bash prompt, създаден с Bash Prompt Генератор v3'];
+  if (pl) head.push("__ps1_sep=$'" + SEP + "'");
+  if (pl && ids.includes('git') && isDyn(cfg)) head.push("__ps1_ico=$'\\xee\\x82\\xa0'");
+  if (cfg.dirtrim && ids.includes('cwd') && !cfg.cwdBase) head.push('PROMPT_DIRTRIM=3');
+
+  /* -------- статичен PS1 (без динамични сегменти) -------- */
+  if (!isDyn(cfg)) {
+    let o = '', prev = null;
+    items.forEach(s => {
+      if (s._rich) {
+        // статично: userhostSplit с три цвята, но без bg в text style; тук използваме bg за фон в powerline/blocks
+        if (pl) {
+          if (prev) o += '\\[\\e[38;' + prev + ';48;' + s.bg + 'm\\]${__ps1_sep}';
+          o += '\\[\\e[' + B + '38;' + s.uColor + ';48;' + s.bg + 'm\\] \\u' +
+               '\\[\\e[' + B + '38;' + s.atColor + ';48;' + s.bg + 'm\\]@' +
+               '\\[\\e[' + B + '38;' + s.hColor + ';48;' + s.bg + 'm\\]\\h ';
+          prev = s.bg;
+        } else if (cfg.style === 'blocks') {
+          o += '\\[\\e[' + B + '38;' + s.uColor + ';48;' + s.bg + 'm\\] \\u' +
+               '\\[\\e[' + B + '38;' + s.atColor + ';48;' + s.bg + 'm\\]@' +
+               '\\[\\e[' + B + '38;' + s.hColor + ';48;' + s.bg + 'm\\]\\h \\[\\e[0m\\] ';
+        } else if (cfg.style === 'text') {
+          o += '\\[\\e[' + B + '38;' + s.uColor + 'm\\]\\u' +
+               '\\[\\e[' + B + '38;' + s.atColor + 'm\\]@' +
+               '\\[\\e[' + B + '38;' + s.hColor + 'm\\]\\h\\[\\e[0m\\] ';
+        } else {
+          o += '\\[\\e[' + B + '38;' + s.uColor + 'm\\][\\u' +
+               '\\[\\e[' + B + '38;' + s.atColor + 'm\\]@' +
+               '\\[\\e[' + B + '38;' + s.hColor + 'm\\]\\h]\\[\\e[0m\\] ';
+        }
+        return;
+      }
+      if (pl) {
+        if (prev) o += '\\[\\e[38;' + prev + ';48;' + s.bg + 'm\\]${__ps1_sep}';
+        o += '\\[\\e[' + B + '38;' + s.fg + ';48;' + s.bg + 'm\\] ' + s.text + ' ';
+        prev = s.bg;
+      } else if (cfg.style === 'blocks') {
+        o += '\\[\\e[' + B + '38;' + s.fg + ';48;' + s.bg + 'm\\] ' + s.text + ' \\[\\e[0m\\] ';
+      } else if (cfg.style === 'text') {
+        o += '\\[\\e[' + B + '38;' + s.bg + 'm\\]' + s.text + '\\[\\e[0m\\] ';
+      } else {
+        o += '\\[\\e[' + B + '38;' + s.bg + 'm\\][' + s.text + ']\\[\\e[0m\\] ';
+      }
+    });
+    if (pl && prev) o += '\\[\\e[0m\\e[38;' + prev + 'm\\]${__ps1_sep}\\[\\e[0m\\]' + (cfg.newline ? '\\n' : ' ');
+    else if (!pl && items.length && cfg.newline) o += '\\n';
+    o += '\\[\\e[' + B + '38;' + symc + 'm\\]' + sym + '\\[\\e[0m\\] ';
+    return head.concat(["PS1='" + o + "'"]).join('\n');
+  }
+
+  /* -------- динамичен PS1 (с __ps1_build) -------- */
+  const comp = [];
+
+  if (ids.includes('git')) {
+    comp.push('  __ps1_git=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)');
+    if (cfg.gitDirty) {
+      comp.push('  if [[ -n $__ps1_git ]]; then');
+      comp.push('    local __st=$(git status --porcelain=v2 --branch 2>/dev/null)');
+      comp.push("    [[ $__st =~ branch.ab\\ \\+([0-9]+) ]] && __ps1_git+=\" ↑${BASH_REMATCH[1]}\"");
+      comp.push("    [[ $__st =~ branch.ab\\ \\+[0-9]+\\ -([0-9]+) ]] && __ps1_git+=\" ↓${BASH_REMATCH[1]}\"");
+      comp.push("    [[ $__st =~ $'\\n'[12]\\  ]] && __ps1_git+='*'");
+      comp.push('  fi');
+    }
+    if (pl) comp.push('  [[ -n $__ps1_git ]] && __ps1_git="${__ps1_ico} ${__ps1_git}"');
+  }
+  if (ids.includes('venv')) comp.push('  __ps1_venv=${VIRTUAL_ENV:+${VIRTUAL_ENV##*/}}');
+  if (ids.includes('jobs')) {
+    comp.push('  __ps1_jobs=$(( $(jobs -p 2>/dev/null | wc -l) ))');
+    comp.push('  (( __ps1_jobs == 0 )) && __ps1_jobs=""');
+  }
+  if (ids.includes('status')) {
+    comp.push('  __ps1_ec=""');
+    comp.push('  (( ec != 0 )) && __ps1_ec=$ec');
+  }
+  if (ids.includes('k8s')) {
+    comp.push('  if [[ -n $KUBECONFIG || -f ~/.kube/config ]]; then');
+    comp.push('    __ps1_k8s=$(kubectl config current-context 2>/dev/null)');
+    comp.push('  fi');
+  }
+  if (ids.includes('tf')) {
+    comp.push('  [[ -f .terraform/environment ]] && __ps1_tf=$(<.terraform/environment)');
+  }
+  if (ids.includes('duration')) {
+    comp.push('  __ps1_dur=""');
+    comp.push('  if (( __ps1_cmd_start > 0 )); then');
+    comp.push('    local __d=$(( SECONDS - __ps1_cmd_start ))');
+    comp.push('    (( __d >= 2 )) && __ps1_dur="[${__d}s]"');
+    comp.push('    __ps1_cmd_start=0');
+    comp.push('  fi');
+  }
+  if (ids.includes('exithist')) {
+    // успешна команда → изчисти историята; грешна → добави отпред, пази 5 (pure-bash, без fork-ове)
+    comp.push('  if (( ec == 0 )); then');
+    comp.push('    __ps1_hist=""');
+    comp.push('  else');
+    comp.push('    local -a __harr=($__ps1_hist)');
+    comp.push('    __ps1_hist="!${ec}"');
+    comp.push('    local __i');
+    comp.push('    for (( __i=0; __i<4 && __i<${#__harr[@]}; __i++ )); do');
+    comp.push('      __ps1_hist+=" ${__harr[__i]}"');
+    comp.push('    done');
+    comp.push('  fi');
+  }
+
+  const calls = [];
+  items.forEach(s => {
+    if (s._rich) {
+      calls.push("  __ps1_seg_rich '" + s.bg + "' '" + (s.guard || '') + "' '" + s.uColor + "' '" + s.atColor + "' '" + s.hColor + "'");
+    } else {
+      const isColored = (pl || cfg.style === 'blocks');
+      const c1 = isColored ? s.fg : s.bg;
+      const c2 = s.bg;
+      calls.push("  __ps1_seg '" + c1 + "' '" + c2 + "' '" + s.text + "'" + (s.guard ? " '" + s.guard + "'" : ''));
+    }
+  });
+
+  const close = pl
+    ? fill(T('c-powerline'), { JOIN: cfg.newline ? '\\n' : ' ' })
+    : (cfg.newline ? T('c-flat') : '');
+
+  let symT = fill(T('sym'), { SYM: sym, SYMCOL: symc, B });
+  if (cfg.symErr) {
+    symT = symT.replace(/\{\{ERRLINE\}\}/, "  (( ec != 0 )) && sc='" + errc + "'");
+  } else {
+    symT = symT.replace(/\n?\{\{ERRLINE\}\}\n?/, '\n').replace(/\n\n+/, '\n');
+  }
+
+  const lines = [].concat(
+    head, [''],
+    [fill(T('h-' + cfg.style), { B })], [''],
+    ['__ps1_build() {', '  local ec=$?', '  __ps1_out=""; __ps1_prev=""; __ps1_any=""'],
+    comp, calls, close ? [close] : [], [symT, '  PS1=$__ps1_out', '}'], ['']
+  );
+  if (ids.includes('duration')) {
+    lines.push('__ps1_preexec() { __ps1_cmd_start=$SECONDS; }');
+    lines.push('trap __ps1_preexec DEBUG');
+    lines.push('');
+  }
+  // глобална променлива за история (преди build функцията — вече е по-горе; тук само reset)
+  if (ids.includes('exithist')) {
+    lines.unshift('__ps1_hist=""');
+    lines.splice(1, 0, '');
+  }
+  lines.push('# Идемпотентно инсталиране в PROMPT_COMMAND');
+  lines.push('if declare -F __ps1_build >/dev/null; then');
+  lines.push('  PROMPT_COMMAND="${PROMPT_COMMAND//__ps1_build;?/}"');
+  lines.push('  PROMPT_COMMAND="${PROMPT_COMMAND//;?__ps1_build/}"');
+  lines.push('  PROMPT_COMMAND="${PROMPT_COMMAND//__ps1_build/}"');
+  lines.push('fi');
+  lines.push('PROMPT_COMMAND="__ps1_build${PROMPT_COMMAND:+;$PROMPT_COMMAND}"');
+  return lines.join('\n');
+}
+/*GEN_END*/
+
+/* ---------- UI ---------- */
+const $ = s => document.querySelector(s);
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const DEFAULT = {
+  style: 'powerline', sepShape: 'arrow',
+  order: ['userhost', 'cwd', 'git', 'venv', 'jobs', 'time', 'status', 'exithist', 'k8s', 'tf', 'duration', 'shlvl'],
+  enabled: { userhost: true, cwd: true, git: true, venv: false, jobs: false, time: false, status: true, exithist: false, k8s: false, tf: false, duration: false, shlvl: false },
+  colors: {
+    userhost: '#4f7be8',
+    user: '#4f7be8',
+    at: '#7b869b',
+    host: '#e0a33a',
+    cwd: '#e0a33a', git: '#4cae85', venv: '#8b6fdc',
+    jobs: '#2fb3c2', time: '#7b869b', status: '#e5575e',
+    exithist: '#b0425c',
+    k8s: '#326ce5', tf: '#7b42bc', duration: '#8a7f5c', shlvl: '#a0674c'
+  },
+  bold: false, newline: true, sym: '❯', symColor: '#4cae85', symErr: true, truecolor: true,
+  cwdBase: false, dirtrim: false, timeFmt: 'A', sshOnly: false, gitDirty: false, duration: false,
+  userhostSplit: true
+};
+const PRESETS = [
+  { name: 'Powerline', set: {} },
+  { name: 'Блокове', set: { style: 'blocks', bold: true } },
+  { name: 'Минимален', set: { style: 'text', newline: false, cwdBase: true, enabled: { userhost: false, cwd: true, git: true, venv: false, jobs: false, time: false, status: false, exithist: false, k8s: false, tf: false, duration: false, shlvl: false } } },
+  { name: 'Сървър през SSH', set: { style: 'brackets', newline: false, sym: '$', sshOnly: true, symColor: '#e0a33a',
+      order: ['time', 'userhost', 'cwd', 'git', 'venv', 'jobs', 'status', 'exithist', 'k8s', 'tf', 'duration', 'shlvl'],
+      enabled: { userhost: true, cwd: true, git: false, venv: false, jobs: false, time: true, status: true, exithist: false, k8s: false, tf: false, duration: false, shlvl: false } } },
+  { name: 'Класически', set: { style: 'text', newline: false, sym: '$', symErr: false, truecolor: false, symColor: '#e8ecf4',
+      colors: { userhost: '#4cae85', cwd: '#5b8def' },
+      enabled: { userhost: true, cwd: true, git: false, venv: false, jobs: false, time: false, status: false, exithist: false, k8s: false, tf: false, duration: false, shlvl: false } } },
+  { name: 'DevOps', set: { style: 'powerline', newline: true, bold: true, gitDirty: true,
+      order: ['time', 'userhost', 'cwd', 'git', 'k8s', 'tf', 'venv', 'status', 'exithist'],
+      enabled: { userhost: true, cwd: true, git: true, venv: true, jobs: false, time: true, status: true, exithist: true, k8s: true, tf: true, duration: false, shlvl: false } } }
+];
+const META = {
+  userhost: ['user@host', '\\u@\\h'],
+  cwd: ['Директория', '\\w'],
+  git: ['Git клон', 'git branch'],
+  venv: ['Python venv', '$VIRTUAL_ENV'],
+  jobs: ['Фонови задачи', 'jobs -p'],
+  time: ['Час', '\\A'],
+  status: ['Код на грешка', '$?'],
+  exithist: ['История на грешки', 'last exit codes'],
+  k8s: ['K8s контекст', 'kubectl'],
+  tf: ['Terraform workspace', '.terraform'],
+  duration: ['Времетраене', '$SECONDS'],
+  shlvl: ['Shell ниво', '$SHLVL']
+};
+const KEY = 'bash-prompt-generator-v3';
+let state = clone(DEFAULT);
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.order && s.colors) state = Object.assign(clone(DEFAULT), s); } catch (e) {}
+const sim = { git: true, ssh: true, fail: false, venv: false, jobs: false, k8s: true, tf: false, hist: false };
+let activePreset = null, lastCode = '', dragSrcId = null;
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function from256(n) {
+  const h = v => v.toString(16).padStart(2, '0');
+  if (n >= 232) { const v = 8 + (n - 232) * 10; return '#' + h(v) + h(v) + h(v); }
+  n -= 16;
+  return '#' + h(LV[Math.floor(n / 36)]) + h(LV[Math.floor(n / 6) % 6]) + h(LV[n % 6]);
+}
+function q(hex) { if (state.truecolor) return hex; const [r, g, b] = hex2rgb(hex); return from256(to256(r, g, b)); }
+function nearest256(hex) { const [r, g, b] = hex2rgb(hex); return to256(r, g, b); }
+
+const ICO = '<svg class="ico" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="4.5" cy="3.5" r="1.7"/><circle cx="4.5" cy="12.5" r="1.7"/><circle cx="11.5" cy="5.5" r="1.7"/><path d="M4.5 5.2v5.6M11.5 7.2c0 2.6-3 2.4-7 3.6"/></svg>';
+
+function visible() {
+  const c = state, out = [];
+  for (const id of c.order) {
+    if (!c.enabled[id]) continue;
+    let t = null;
+    switch (id) {
+      case 'userhost':
+        if (!c.sshOnly || sim.ssh) {
+          if (c.userhostSplit) {
+            out.push({ id, rich: true, u: 'admin', at: '@', h: 'srv-sof01',
+              uColor: q(c.colors.user), atColor: q(c.colors.at), hColor: q(c.colors.host),
+              bg: q(c.colors.userhost), fg: q(textOn(c.colors.userhost)) });
+            continue;
+          }
+          t = 'admin@srv-sof01';
+        }
+        break;
+      case 'cwd': t = c.cwdBase ? (sim.git ? 'roles' : 'nginx') : (sim.git ? (c.dirtrim ? '~/.../infra/ansible/roles' : '~/work/infra/ansible/roles') : '/etc/nginx'); break;
+      case 'git': if (sim.git) t = (c.style === 'powerline' ? '{{ico}} ' : '') + 'main' + (c.gitDirty ? ' ↑2*' : ''); break;
+      case 'venv': if (sim.venv) t = 'py:ansible-env'; break;
+      case 'jobs': if (sim.jobs) t = 'bg:2'; break;
+      case 'time': {
+        const t0 = c.timeFmt;
+        t = t0 === 't' ? '14:32:07' : t0 === 'T' ? '02:32:07' : t0 === '@' ? '02:32 PM' : t0.startsWith('+') ? '14:32:07 UTC' : '14:32';
+        break;
+      }
+      case 'status': if (sim.fail) t = '✘ 1'; break;
+      case 'exithist': if (sim.hist || sim.fail) t = sim.hist ? '!1 !1 !0 !2 !1' : '!1'; break;
+      case 'k8s': if (sim.k8s) t = '☸ prod-eu-west'; break;
+      case 'tf': if (sim.tf) t = 'tf:production'; break;
+      case 'duration': if (sim.fail) t = '[4s]'; break;
+      case 'shlvl': t = 'sh2'; break;
+    }
+    if (t === null) continue;
+    const bg = q(c.colors[id]);
+    out.push({ id, text: t, bg, fg: q(textOn(c.colors[id])) });
+  }
+  return out;
+}
+const sepH = (a, b) => '<i class="sep ' + (state.sepShape || 'arrow') + '" style="--a:' + a + (b ? ';--b:' + b : '') + '"></i>';
+const body = s => esc(s).replace('{{ico}}', ICO);
+
+function renderTerm() {
+  const c = state, items = visible(), bd = c.bold ? ' b' : '';
+  let row = '';
+  items.forEach((s, i) => {
+    const prev = items[i - 1];
+    if (c.style === 'powerline') {
+      if (i > 0) row += sepH(prev.bg, s.bg);
+      if (s.rich) {
+        row += '<span class="blk' + bd + '" style="background:' + s.bg + '">' +
+          '<span style="color:' + s.uColor + '">' + esc(s.u) + '</span>' +
+          '<span style="color:' + s.atColor + '">' + esc(s.at) + '</span>' +
+          '<span style="color:' + s.hColor + '">' + esc(s.h) + '</span>' +
+          '</span>';
+      } else {
+        row += '<span class="blk' + bd + '" style="background:' + s.bg + ';color:' + s.fg + '">' + body(s.text) + '</span>';
+      }
+    } else {
+      if (i > 0) row += '<span class="gap"></span>';
+      if (c.style === 'blocks') {
+        if (s.rich) {
+          row += '<span class="blk' + bd + '" style="background:' + s.bg + '">' +
+            '<span style="color:' + s.uColor + '">' + esc(s.u) + '</span>' +
+            '<span style="color:' + s.atColor + '">' + esc(s.at) + '</span>' +
+            '<span style="color:' + s.hColor + '">' + esc(s.h) + '</span></span>';
+        } else {
+          row += '<span class="blk' + bd + '" style="background:' + s.bg + ';color:' + s.fg + '">' + body(s.text) + '</span>';
+        }
+      } else if (c.style === 'text') {
+        if (s.rich) {
+          row += '<span class="tx' + bd + '"><span style="color:' + s.uColor + '">' + esc(s.u) + '</span>' +
+            '<span style="color:' + s.atColor + '">' + esc(s.at) + '</span>' +
+            '<span style="color:' + s.hColor + '">' + esc(s.h) + '</span></span>';
+        } else {
+          row += '<span class="tx' + bd + '" style="color:' + s.bg + '">' + body(s.text) + '</span>';
+        }
+      } else {
+        if (s.rich) {
+          row += '<span class="tx' + bd + '">[' +
+            '<span style="color:' + s.uColor + '">' + esc(s.u) + '</span>' +
+            '<span style="color:' + s.atColor + '">' + esc(s.at) + '</span>' +
+            '<span style="color:' + s.hColor + '">' + esc(s.h) + '</span>]</span>';
+        } else {
+          row += '<span class="tx' + bd + '" style="color:' + s.bg + '">[' + body(s.text) + ']</span>';
+        }
+      }
+    }
+  });
+  if (c.style === 'powerline' && items.length) row += sepH(items[items.length - 1].bg, '');
+  const symCol = q(sim.fail && c.symErr ? '#ff5f5f' : c.symColor);
+  const sym = '<span class="sym' + bd + '" style="color:' + symCol + '">' + esc(c.sym) + '</span><span class="gap"></span><span class="cur"></span>';
+
+  const prevCmd = sim.fail ? 'sudo nginx -t' : 'ls -la';
+  const prevOut = sim.fail
+    ? 'nginx: [emerg] unknown directive "servr" in /etc/nginx/sites-enabled/api:7'
+    : 'total 48\ndrwxr-xr-x  8 admin admin 4096 Jan 12 09:14 .';
+  let html = '<div class="dim">$ ' + esc(prevCmd) + '\n' + esc(prevOut) + '</div>';
+
+  if (!items.length) {
+    html += '<div class="empty">Няма избрани сегменти — включи поне един отляво.</div>';
+    $('#term').innerHTML = html;
+    return;
+  }
+  if (c.newline) html += '<div class="line"><span class="ps">' + row + '</span></div><div class="line">' + sym + '</div>';
+  else html += '<div class="line"><span class="ps">' + row + '</span>' + '<span class="gap"></span>' + sym + '</div>';
+  $('#term').innerHTML = html;
+}
+
+function hl(code) {
+  return code.split('\n').map(l => /^\s*#/.test(l) ? '<span class="cm">' + esc(l) + '</span>' : esc(l)).join('\n');
+}
+function notes() {
+  const n = ['Постави скрипта в края на <code>~/.bashrc</code> и изпълни <code>source ~/.bashrc</code>.'];
+  if (state.style === 'powerline') n.push('Разделителите изискват Nerd Font или Powerline шрифт в терминала, иначе се виждат като празни кутийки.');
+  if (state.truecolor) n.push('24-bit цветовете работят в повечето графични терминали. В чистата Linux конзола (tty) избери 256 цвята.');
+  if (state.duration && state.enabled.duration) n.push('За времетраене се използва <code>trap DEBUG</code> — може да конфликтува с други DEBUG trap-ове.');
+  if (state.enabled.k8s) n.push('<code>kubectl config current-context</code> е бавен (~50ms). Изпълнява се само ако има <code>~/.kube/config</code>.');
+  if (state.enabled.exithist) n.push('Историята на грешките се изчиства при успешна команда и пази последните 5 ненулеви кода.');
+  n.push(isDyn(state)
+    ? 'Скриптът слага <code>__ps1_build</code> в началото на <code>PROMPT_COMMAND</code> идемпотентно (проверка с <code>declare -F</code>).'
+    : 'Резултатът е един ред <code>PS1</code>, без функции и без външни процеси.');
+  return n;
+}
+function update() {
+  renderTerm();
+  lastCode = generate(state);
+  $('#out').innerHTML = hl(lastCode);
+  $('#notes').innerHTML = notes().map(x => '<li>' + x + '</li>').join('');
+  $('#shapeWrap').hidden = state.style !== 'powerline';
+  document.querySelectorAll('#styleCtl button').forEach(b => b.setAttribute('aria-pressed', b.dataset.style === state.style));
+  document.querySelectorAll('#shapeCtl button').forEach(b => b.setAttribute('aria-pressed', b.dataset.shape === state.sepShape));
+  document.querySelectorAll('#presets .chip').forEach((b, i) => b.setAttribute('aria-pressed', i === activePreset));
+  document.querySelectorAll('.row').forEach(r => {
+    const id = r.dataset.id;
+    if (id && state.colors[id] && !state.truecolor) {
+      r.classList.add('show-256');
+      const el = r.querySelector('.color-256');
+      if (el) el.textContent = '#' + nearest256(state.colors[id]);
+    } else r.classList.remove('show-256');
+  });
+  save();
+}
+
+function buildSegs() {
+  const ul = $('#segs'); ul.innerHTML = '';
+  state.order.forEach((id, i) => {
+    if (!META[id]) return;
+    const li = document.createElement('li'); li.className = 'row'; li.dataset.id = id; li.draggable = true;
+    li.innerHTML =
+      '<span class="drag" aria-hidden="true" title="Влачи за пренареждане">⋮⋮</span>' +
+      '<input type="checkbox" id="en-' + id + '"' + (state.enabled[id] ? ' checked' : '') + ' aria-label="Включи ' + META[id][0] + '">' +
+      '<label for="en-' + id + '"><span class="nm">' + META[id][0] + '</span><code>' + esc(META[id][1]) + '</code></label>' +
+      '<span class="color-wrap"><input type="color" id="co-' + id + '" value="' + state.colors[id] + '" aria-label="Цвят: ' + META[id][0] + '"><span class="color-256"></span></span>' +
+      '<span class="mv"><button type="button" data-d="-1" aria-label="Премести нагоре"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button type="button" data-d="1" aria-label="Премести надолу"' + (i === state.order.length - 1 ? ' disabled' : '') + '>↓</button></span>';
+    li.querySelector('input[type=checkbox]').addEventListener('change', e => { state.enabled[id] = e.target.checked; activePreset = null; buildSegs(); update(); });
+    li.querySelector('input[type=color]').addEventListener('input', e => { state.colors[id] = e.target.value; activePreset = null; update(); });
+    li.querySelectorAll('.mv button').forEach(b => b.addEventListener('click', () => {
+      const j = i + Number(b.dataset.d);
+      [state.order[i], state.order[j]] = [state.order[j], state.order[i]];
+      activePreset = null; buildSegs(); update();
+    }));
+    li.addEventListener('dragstart', e => { dragSrcId = id; li.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    li.addEventListener('dragend', () => { li.classList.remove('dragging'); document.querySelectorAll('.row').forEach(r => r.classList.remove('drag-over')); });
+    li.addEventListener('dragover', e => { e.preventDefault(); if (dragSrcId && dragSrcId !== id) li.classList.add('drag-over'); });
+    li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+    li.addEventListener('drop', e => {
+      e.preventDefault(); li.classList.remove('drag-over');
+      if (!dragSrcId || dragSrcId === id) return;
+      const from = state.order.indexOf(dragSrcId), to = state.order.indexOf(id);
+      state.order.splice(from, 1); state.order.splice(to, 0, dragSrcId);
+      dragSrcId = null; activePreset = null; buildSegs(); update();
+    });
+    ul.appendChild(li);
+
+    // Под-ред с три цвята за user@host
+    if (id === 'userhost' && state.enabled.userhost) {
+      const sub = document.createElement('li');
+      sub.className = 'row sub';
+      sub.innerHTML =
+        '<span></span>' +
+        '<span class="split-colors">' +
+          '<label><input type="color" id="co-user" value="' + state.colors.user + '"> user</label>' +
+          '<label><input type="color" id="co-at" value="' + state.colors.at + '"> @</label>' +
+          '<label><input type="color" id="co-host" value="' + state.colors.host + '"> host</label>' +
+        '</span>' +
+        '<label style="font-size:13px;display:flex;gap:6px;align-items:center;color:var(--ink)">' +
+          '<input type="checkbox" id="k-split"' + (state.userhostSplit ? ' checked' : '') + '> разделени</label>';
+      sub.querySelector('#co-user').addEventListener('input', e => { state.colors.user = e.target.value; activePreset = null; update(); });
+      sub.querySelector('#co-at').addEventListener('input', e => { state.colors.at = e.target.value; activePreset = null; update(); });
+      sub.querySelector('#co-host').addEventListener('input', e => { state.colors.host = e.target.value; activePreset = null; update(); });
+      sub.querySelector('#k-split').addEventListener('change', e => { state.userhostSplit = e.target.checked; activePreset = null; update(); });
+      ul.appendChild(sub);
+    }
+  });
+}
+
+function syncControls() {
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.dataset.k;
+    if (el.type === 'checkbox') el.checked = !!state[k];
+    else if (el.dataset.type === 'bool') el.value = state[k] ? '1' : '0';
+    else el.value = state[k];
+  });
+  document.querySelectorAll('[data-s]').forEach(el => { el.checked = !!sim[el.dataset.s]; });
+}
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* Events */
+document.querySelectorAll('[data-k]').forEach(el => {
+  el.addEventListener(el.type === 'color' ? 'input' : 'change', () => {
+    const k = el.dataset.k;
+    state[k] = el.type === 'checkbox' ? el.checked : el.dataset.type === 'bool' ? el.value === '1' : el.value;
+    if (k === 'truecolor') buildSegs();
+    activePreset = null; update();
+  });
+});
+document.querySelectorAll('[data-s]').forEach(el => el.addEventListener('change', () => { sim[el.dataset.s] = el.checked; update(); }));
+document.querySelectorAll('#styleCtl button').forEach(b => b.addEventListener('click', () => { state.style = b.dataset.style; activePreset = null; update(); }));
+document.querySelectorAll('#shapeCtl button').forEach(b => b.addEventListener('click', () => { state.sepShape = b.dataset.shape; activePreset = null; update(); }));
+
+PRESETS.forEach((p, i) => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = p.name;
+  b.addEventListener('click', () => {
+    const s = clone(DEFAULT), set = clone(p.set);
+    ['enabled', 'colors'].forEach(k => { if (set[k]) set[k] = Object.assign(s[k], set[k]); });
+    state = Object.assign(s, set);
+    activePreset = i; buildSegs(); syncControls(); update();
+  });
+  $('#presets').appendChild(b);
+});
+
+$('#copy').addEventListener('click', () => {
+  const btn = $('#copy');
+  const done = () => { btn.textContent = 'Копирано'; toast('Скриптът е в клипборда'); setTimeout(() => { btn.textContent = 'Копирай'; }, 1600); };
+  const fallback = () => {
+    const r = document.createRange(); r.selectNodeContents($('#out'));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = 'Маркирано'; toast('Натисни Ctrl+C');
+    setTimeout(() => { btn.textContent = 'Копирай'; }, 2400);
+  };
+  try { navigator.clipboard.writeText(lastCode).then(done, fallback); } catch (e) { fallback(); }
+});
+
+/* Theme toggle */
+const themeBtn = $('#themeToggle');
+function applyTheme(t) {
+  if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+  else delete document.documentElement.dataset.theme;
+  const isDark = t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches);
+  themeBtn.textContent = isDark ? '☀️' : '🌙';
+  try { localStorage.setItem(KEY + '-theme', t || 'auto'); } catch (e) {}
+}
+let savedTheme = 'auto';
+try { savedTheme = localStorage.getItem(KEY + '-theme') || 'auto'; } catch (e) {}
+if (savedTheme !== 'auto') applyTheme(savedTheme);
+themeBtn.addEventListener('click', () => {
+  const cur = document.documentElement.dataset.theme;
+  const next = cur === 'dark' ? 'light' : 'dark';
+  applyTheme(next); savedTheme = next;
+});
+
+/* Export / Import / Share */
+$('#exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bash-prompt-config.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Свалено като JSON');
+});
+
+$('#importBtn').addEventListener('click', () => $('#importFile').click());
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const s = JSON.parse(await f.text());
+    if (s && s.order && s.colors) {
+      state = Object.assign(clone(DEFAULT), s);
+      activePreset = null; buildSegs(); syncControls(); update();
+      toast('Конфигурацията е заредена');
+    } else toast('Невалиден файл');
+  } catch (err) { toast('Грешка при четене'); }
+  e.target.value = '';
+});
+
+$('#shareBtn').addEventListener('click', () => {
+  const json = JSON.stringify(state);
+  const enc = btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const url = location.origin + location.pathname + '#cfg=' + enc;
+  try {
+    navigator.clipboard.writeText(url).then(() => toast('Линкът е копиран'), () => {
+      history.replaceState(null, '', '#cfg=' + enc);
+      toast('Линкът е в адрес бара');
+    });
+  } catch (e) {
+    history.replaceState(null, '', '#cfg=' + enc);
+    toast('Линкът е в адрес бара');
+  }
+});
+
+/* Load from hash */
+(function loadHash() {
+  const m = location.hash.match(/^#cfg=(.+)$/);
+  if (!m) return;
+  try {
+    const dec = decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/'))));
+    const s = JSON.parse(dec);
+    if (s && s.order && s.colors) state = Object.assign(clone(DEFAULT), s);
+  } catch (e) {}
+})();
+
+/* Keyboard shortcuts */
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input,select,textarea')) return;
+  if (e.key >= '1' && e.key <= '4') {
+    const styles = ['powerline', 'blocks', 'text', 'brackets'];
+    state.style = styles[+e.key - 1]; activePreset = null; update();
+  }
+});
+
+buildSegs(); syncControls(); update();
+</script>
+
+</body>
+</html>
