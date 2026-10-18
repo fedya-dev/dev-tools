@@ -1,0 +1,31 @@
+# DEV.FEDIA.EU
+
+Професионални уеб инструменти за разработчици и системни администратори.
+Всичко работи локално в браузъра (версия 2.0).
+
+## Основна страница
+
+- [Начало / Dashboard](https://dev.fedia.eu/)
+
+## Инструменти
+
+- [CommandHub](https://dev.fedia.eu/commandhub.html) — Ubuntu & PowerShell команди
+- [File Encryptor](https://dev.fedia.eu/encrypt.html)
+- [YAML Checker](https://dev.fedia.eu/yaml-checker.html)
+- [Bash Prompt Generator](https://dev.fedia.eu/bash-prompt.html)
+- [Markdown Editor](https://dev.fedia.eu/md_editor.html)
+- [EXIF/GPS Cleaner](https://dev.fedia.eu/premahva-exif-gps-xmp.html)
+
+## Автор
+
+- [Федя Серафиев](https://fedia.eu/)
+
+## Свързани сайтове
+
+- [IT Praktika](https://itpraktika.com/)
+- [Spirachki.eu](https://spirachki.eu/)
+- [ZdraveBG.eu](https://zdravebg.eu/)
+
+## Политика
+
+Публичното съдържание може да бъде индексирано и обобщавано от AI системи с посочване на източника.

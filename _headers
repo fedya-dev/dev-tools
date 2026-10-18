@@ -1,0 +1,7 @@
+/config.json
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: private, no-cache
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

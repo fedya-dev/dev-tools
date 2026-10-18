@@ -1,0 +1,5 @@
+{
+  "adminPassword": "fedia007",
+  "version": "2.0",
+  "_note": "Смени adminPassword преди production. Това е клиентска защита, не е реална сигурност."
+}

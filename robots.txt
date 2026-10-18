@@ -1,0 +1,9 @@
+# robots.txt for Dev Tools Pro
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://dev.fedia.eu/sitemap.xml
+
+# Optional: be nice to aggressive bots
+Crawl-delay: 1
