@@ -498,23 +498,36 @@
 }
 .devtools-hub-bar a{color:#93c5fd;text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:.35rem}
 .devtools-hub-bar a:hover{color:#bfdbfe}
-.devtools-hub-bar .hub-title{color:#e5e7eb;font-weight:600}
-.devtools-hub-bar .hub-links{display:flex;gap:.9rem;flex-wrap:wrap;align-items:center}
-@media(max-width:600px){.devtools-hub-bar .hub-links a:not(:first-child){display:none}}
+.devtools-hub-bar a.active{color:#fff;font-weight:600}
+.devtools-hub-bar .hub-title{color:#e5e7eb;font-weight:700}
+.devtools-hub-bar .hub-links{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+.devtools-hub-bar .hub-group-sep{color:rgba(255,255,255,.2);user-select:none}
+@media(max-width:760px){
+  .devtools-hub-bar{padding:.45rem .9rem;gap:.45rem;flex-wrap:wrap}
+  .devtools-hub-bar .hub-links{font-size:.78rem;gap:.45rem}
+  .devtools-hub-bar .hub-group-sep{display:none}
+  .devtools-hub-bar .hub-links a span.lbl{display:none}
+  .devtools-hub-bar .hub-title span.lbl{display:none}
+}
 /* offset page content so fixed bar doesn't cover it */
 body.devtools-has-hub{padding-top:3rem !important}
 </style>
 </head>
 <body class="devtools-has-hub">
 <div class="devtools-hub-bar">
-  <a href="index.html" class="hub-title">🛠️ Dev Tools Pro</a>
-  <div class="hub-links">
-    <a href="index.html">🏠 Начало</a>
-    <a href="commandhub.html">🐧 CommandHub</a>
-    <a href="encrypt.html">🔐 Encrypt</a>
-    <a href="yaml-checker.html">📋 YAML</a>
-    <a href="bash-prompt.html">🎨 Prompt</a>
-  </div>
+<a href="index.html" class="hub-title" title="Dev Tools Pro — начало"><span>🛠️</span><span class="lbl">Dev Tools Pro</span></a>
+<div class="hub-links">
+<a href="index.html#translit" title="Транслитерация"><span>🔤</span><span class="lbl">Translit</span></a>
+<a href="yaml-checker.html" title="YAML Checker" class="active"><span>📋</span><span class="lbl">YAML</span></a>
+<a href="md_editor.html" title="Markdown Editor"><span>📝</span><span class="lbl">MD</span></a>
+<a href="word-count.html" title="Брояч на думи"><span>🔡</span><span class="lbl">Брояч</span></a>
+<a href="premahva-exif-gps-xmp.html" title="EXIF/GPS Cleaner"><span>🖼️</span><span class="lbl">EXIF</span></a>
+<a href="index.html#emoji" title="Emoji Library"><span>😀</span><span class="lbl">Emoji</span></a>
+<span class="hub-group-sep" aria-hidden="true">|</span>
+<a href="commandhub.html" title="CommandHub"><span>🐧</span><span class="lbl">CommandHub</span></a>
+<a href="encrypt.html" title="Encrypt"><span>🔐</span><span class="lbl">Encrypt</span></a>
+<a href="bash-prompt.html" title="Bash Prompt"><span>🎨</span><span class="lbl">Bash Prompt</span></a>
+</div>
 </div>
 
 

@@ -1,20 +1,26 @@
 # DEV.FEDIA.EU
 
 Професионални уеб инструменти за разработчици и системни администратори.
-Всичко работи локално в браузъра (версия 2.0).
+Всичко работи локално в браузъра (версия 2.1).
 
 ## Основна страница
 
-- [Начало / Dashboard](https://dev.fedia.eu/)
+- [Начало / Транслитерация](https://dev.fedia.eu/) — кирилица → латиница за URL slug
 
-## Инструменти
+## Често използвани инструменти
+
+- [Транслитерация](https://dev.fedia.eu/#translit) — кирилица → латиница
+- [YAML Checker](https://dev.fedia.eu/yaml-checker.html) — front matter за портала
+- [Markdown Editor](https://dev.fedia.eu/md_editor.html) — пълноценен редактор с preview
+- [Брояч на думи](https://dev.fedia.eu/word-count.html) — статистика и SEO/SERP проверка
+- [EXIF/GPS Cleaner](https://dev.fedia.eu/premahva-exif-gps-xmp.html) — премахва метаданни от снимки и текст
+- [Emoji Library](https://dev.fedia.eu/#emoji) — Docker, Proxmox, WordPress и още
+
+## Разширени инструменти
 
 - [CommandHub](https://dev.fedia.eu/commandhub.html) — Ubuntu & PowerShell команди
-- [File Encryptor](https://dev.fedia.eu/encrypt.html)
-- [YAML Checker](https://dev.fedia.eu/yaml-checker.html)
-- [Bash Prompt Generator](https://dev.fedia.eu/bash-prompt.html)
-- [Markdown Editor](https://dev.fedia.eu/md_editor.html)
-- [EXIF/GPS Cleaner](https://dev.fedia.eu/premahva-exif-gps-xmp.html)
+- [File Encryptor](https://dev.fedia.eu/encrypt.html) — AES криптиране на файлове
+- [Bash Prompt Generator](https://dev.fedia.eu/bash-prompt.html) — персонализиран PS1
 
 ## Автор
 
