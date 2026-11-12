@@ -4,8 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>YAML Front Matter Checker — всички портали</title>
+<link rel="canonical" href="https://dev.serafiev.com/yaml-checker.html">
+<meta name="description" content="Проверка на YAML front matter с шаблони и команди за serafiev.com, TrainBrakes и Здраве & Красота — всичко работи локално в браузъра.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dev.serafiev.com/yaml-checker.html">
+<meta property="og:title" content="YAML Front Matter Checker — Dev Tools Pro">
+<meta property="og:description" content="Проверка на YAML front matter с шаблони за три портала. 100% локално в браузъра.">
+<meta property="og:image" content="https://dev.serafiev.com/og-image.png">
+<meta property="og:locale" content="bg_BG">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E👌%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
   :root{
     --bg: #0e1015;
@@ -527,6 +538,8 @@ body.devtools-has-hub{padding-top:3rem !important}
 <a href="commandhub.html" title="CommandHub"><span>🐧</span><span class="lbl">CommandHub</span></a>
 <a href="encrypt.html" title="Encrypt"><span>🔐</span><span class="lbl">Encrypt</span></a>
 <a href="bash-prompt.html" title="Bash Prompt"><span>🎨</span><span class="lbl">Bash Prompt</span></a>
+<span class="hub-group-sep" aria-hidden="true">|</span>
+<a href="https://serafiev.com/" title="Главният сайт — Федя Серафиев" target="_blank" rel="noopener"><span>🌐</span><span class="lbl">serafiev.com</span></a>
 </div>
 </div>
 
@@ -547,13 +560,11 @@ body.devtools-has-hub{padding-top:3rem !important}
     <button class="tab" data-project="trainbrakes" onclick="switchProject('trainbrakes')">🚆 TrainBrakes</button>
     <button class="tab" data-project="zdravemag" onclick="switchProject('zdravemag')">🌿 Здраве &amp; Красота</button>
 	
-<a href="https://dev.fedia.eu/" style="text-decoration: none; display: inline-block; margin-left: auto;">
-    <button class="tab" data-project="dev.fedia.eu" onclick="switchProject('dev.fedia.eu')" 
-            style="border: 1.5px solid #22c55e; border-radius: 6px; font-weight: 600; background-color: rgba(34, 197, 94, 0.05); color: #16a34a; transition: all 0.2s ease; cursor: pointer;"
-            onmouseover="this.style.backgroundColor='rgba(34, 197, 94, 0.15)'" 
-            onmouseout="this.style.backgroundColor='rgba(34, 197, 94, 0.05)'">
-         🛠️ Към dev.fedia.eu
-    </button>
+<a href="https://serafiev.com/" target="_blank" rel="noopener" class="tab"
+   style="border: 1.5px solid #22c55e; border-radius: 6px; font-weight: 600; background-color: rgba(34, 197, 94, 0.05); color: #16a34a; transition: all 0.2s ease; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; margin-left: auto;"
+   onmouseover="this.style.backgroundColor='rgba(34, 197, 94, 0.15)'"
+   onmouseout="this.style.backgroundColor='rgba(34, 197, 94, 0.05)'">
+     🌐 serafiev.com
 </a>
 
 </div>
@@ -566,28 +577,28 @@ body.devtools-has-hub{padding-top:3rem !important}
 
     <div class="project-banner">
       <span class="project-dot" style="background: var(--accent);"></span>
-      <strong>Linux-DevOps портал</strong>
-      <span class="project-url">linuxdev.fedia.eu</span>
+      <strong>serafiev.com — Linux-DevOps</strong>
+      <span class="project-url">serafiev.com</span>
     </div>
 
     <div class="commands">
       <h2>⚡ Команди за нова статия</h2>
       <div class="cmd-row">
-        <span class="cmd-label">📝 Post</span>
-        <code class="cmd-code" id="cmd-ld-post">npm run new:post "Заглавие на статия"</code>
-        <span class="cmd-desc">→ <code>src/content/posts/</code></span>
+        <span class="cmd-label">📝 Файл</span>
+        <code class="cmd-code" id="cmd-ld-post">src/content/wsl/nova-statia.md</code>
+        <span class="cmd-desc">→ колекции: <code>wsl · proxmox · docker · linux</code></span>
         <button class="copy-small" onclick="copyCmd('cmd-ld-post', this)">Копирай</button>
       </div>
       <div class="cmd-row">
-        <span class="cmd-label">📚 Tutorial</span>
-        <code class="cmd-code" id="cmd-ld-tutorial">npm run new:tutorial "Заглавие на урок"</code>
-        <span class="cmd-desc">→ <code>src/content/tutorials/</code></span>
+        <span class="cmd-label">🔎 Преглед</span>
+        <code class="cmd-code" id="cmd-ld-tutorial">npm run dev</code>
+        <span class="cmd-desc">→ <code>http://localhost:4321</code></span>
         <button class="copy-small" onclick="copyCmd('cmd-ld-tutorial', this)">Копирай</button>
       </div>
       <div class="cmd-row">
-        <span class="cmd-label">🐧 Script</span>
-        <code class="cmd-code" id="cmd-ld-script">npm run new:script "Заглавие на скрипт"</code>
-        <span class="cmd-desc">→ <code>src/content/scripts/</code></span>
+        <span class="cmd-label">🚀 Publish</span>
+        <code class="cmd-code" id="cmd-ld-script">npm run build && npx wrangler deploy</code>
+        <span class="cmd-desc">→ Cloudflare Workers</span>
         <button class="copy-small" onclick="copyCmd('cmd-ld-script', this)">Копирай</button>
       </div>
     </div>
@@ -596,16 +607,16 @@ body.devtools-has-hub{padding-top:3rem !important}
       <h2>📋 Шаблони — зареди в редактора</h2>
       <div class="template-buttons">
         <button class="tpl-btn" onclick="loadTemplate('linuxdevops', 'post')">
-          <span class="tpl-title" style="color: var(--info);">📝 Post</span>
-          <span class="tpl-sub">readTime, author</span>
+          <span class="tpl-title" style="color: var(--info);">📝 Статия в серия</span>
+          <span class="tpl-sub">series, part, order</span>
         </button>
         <button class="tpl-btn" onclick="loadTemplate('linuxdevops', 'tutorial')">
-          <span class="tpl-title" style="color: var(--purple);">📚 Tutorial</span>
-          <span class="tpl-sub">level, duration, prerequisites</span>
+          <span class="tpl-title" style="color: var(--purple);">🌐 EN статия</span>
+          <span class="tpl-sub">lang: en, updatedDate</span>
         </button>
         <button class="tpl-btn" onclick="loadTemplate('linuxdevops', 'script')">
-          <span class="tpl-title" style="color: var(--ok);">🐧 Script</span>
-          <span class="tpl-sub">version, language, dependencies</span>
+          <span class="tpl-title" style="color: var(--ok);">📄 Docs страница</span>
+          <span class="tpl-sub">docs: title, description</span>
         </button>
       </div>
     </div>
@@ -756,16 +767,17 @@ const TEMPLATES = {
   linuxdevops: {
     post: `---
 title: ""
-seoTitle: ""
 description: ""
-pubDate: 2026-09-21T10:00:00
-category: "DevOps"
-tags: []
-author: LinuxDev Team
+series: wsl
+part: 4
+order: 4
+author: "Федя Серафиев"
+pubDate: 2026-11-12T09:00:00
+lang: bg
 draft: true
-featured: false
-readTime: 10 мин
-heroImage: ""
+tags: []
+categories: []
+heroImage: "/images/nova-statia.webp"
 heroImageAlt: ""
 ---
 
@@ -773,16 +785,15 @@ heroImageAlt: ""
 
     tutorial: `---
 title: ""
-seoTitle: ""
 description: ""
-pubDate: 2026-09-21T10:00:00
-category: "DevOps"
-level: "Beginner"
-duration: 20 мин
-tags: []
-prerequisites: []
+series: linux
+author: "Федя Серафиев"
+pubDate: 2026-11-12T09:00:00
+updatedDate: 2026-11-12T09:00:00
+lang: en
 draft: true
-featured: false
+tags: []
+categories: []
 heroImage: ""
 heroImageAlt: ""
 ---
@@ -791,22 +802,8 @@ heroImageAlt: ""
 
     script: `---
 title: ""
-seoTitle: ""
 description: ""
-pubDate: 2026-09-21T10:00:00
-updatedDate: 2026-09-21T10:00:00
-category: "Automation"
-tags: []
-author: LinuxDev Team
-version: "1.0.0"
-language: bash
-dependencies: []
-usage: ""
-repository: ""
-draft: true
-featured: false
-heroImage: ""
-heroImageAlt: ""
+updatedDate: 2026-11-12T09:00:00
 ---
 
 `
@@ -893,8 +890,14 @@ function switchProject(project) {
 }
 
 function loadTemplate(project, name) {
-  const tpl = TEMPLATES[project] && TEMPLATES[project][name];
+  let tpl = TEMPLATES[project] && TEMPLATES[project][name];
   if (!tpl) return;
+
+  // свежи pubDate/updatedDate → текущият момент (локално време, ISO 8601)
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const iso = now.toISOString().slice(0, 19);
+  tpl = tpl.replace(/^(pubDate|updatedDate):.*$/gm, (m, k) => k + ': ' + iso);
 
   input.value = tpl;
   syncGutter();

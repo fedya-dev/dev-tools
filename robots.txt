@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://dev.fedia.eu/sitemap.xml
+Sitemap: https://dev.serafiev.com/sitemap.xml
 
 # Optional: be nice to aggressive bots
 Crawl-delay: 1

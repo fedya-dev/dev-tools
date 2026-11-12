@@ -1,0 +1,177 @@
+════════════════════════════════════════════════════════════════════
+  DEV TOOLS PRO v2.2 — ОДИТ И МИГРАЦИЯ КЪМ DEV.SERAFIEV.COM
+  Доклад + инструкция | 12.11.2026
+════════════════════════════════════════════════════════════════════
+
+ОДИТЪТ Е ГОТОВ. Всичко е проверено в браузър (всяка страница е
+заредена, скринснат и тествана). По-долу — какво намерих, какво
+поправих, какво надградих и какво умишлено НЕ пипнах.
+
+────────────────────────────────────────────────────────────────────
+1) МИГРАЦИЯ НА ДОМЕЙНА (главната задача)
+────────────────────────────────────────────────────────────────────
+[OK] dev.fedia.eu → dev.serafiev.com  — 24 места: sitemap.xml (8 URL),
+     robots.txt, llms.txt (11), humans.txt, README.md, index.html
+     (JSON-LD), yaml-checker, md_editor, bash-prompt, dev-tools.html
+     (canonical).
+[OK] fedia.eu → serafiev.com  — линковете към ГЛАВНИЯ сайт вече водят
+     до serafiev.com: менюто и футърът на index.html, баджът
+     "Към serafiev.com" в CommandHub, брендът и футърът в Encryptor,
+     бутонът в yaml-checker ("🌐 serafiev.com"), бутонът в
+     bash-prompt, llms.txt, humans.txt, README.md.
+[OK] НОВО: хъб-барът на ВСЕКИ под-страници завършва с
+     "| 🌐 serafiev.com" — линк към главния сайт от навсякъде.
+[OK] CommandHub: каноничният URL и og:url сочеха стария адрес
+     komandi.pages.dev → сега dev.serafiev.com/commandhub.html.
+[OK] index.html: JSON-LD имаше placeholder "https://YOURDOMAIN.com/"
+     → сега https://dev.serafiev.com/.
+[OK] dev-tools.html (старата страница-redirect): canonical → новия
+     домейн, добавена noindex + favicon.
+
+Остава ЕДИННО fedia.eu място, УМИШЛЕНО: CommandHub синхронизацията
+API_URL = https://command-hub-api.fedia.workers.dev/api/data
+(.workers.dev адрес на отделен Cloudflare Worker — не е линк, а
+функционален backend. Ако го сменя на име, което не съществува,
+синхронизацията ще счупи. Реши отделно дали ще преименуваш Worker-а.)
+
+────────────────────────────────────────────────────────────────────
+2) ФАВИКОНИ — БИЛО Е ХАОС, СЕГА Е БРАНД
+────────────────────────────────────────────────────────────────────
+ПРЕДИ: всяка страница имаше различна emoji икона (🛠️ 👌 👨‍💻 🐧 🔐 ❯),
+а word-count.html, „Брояч на думи.html" и dev-tools.html НЯМАХА
+никаква икона. apple-touch-icon имаше само CommandHub.
+СЕГА:
+[OK] Единен професионален бранд — син градиент rounded квадрат с
+     терминален промпт ">_":
+       favicon.svg (векторен, за modern браузъри)
+       favicon.ico (16+32+48 px, fallback)
+       favicon-16.png / favicon-32.png / favicon-192.png
+       apple-touch-icon.png (за iOS/Android)
+[OK] Всички 9 страници имат ИДЕНТИЧНИЯ favicon блок с абсолютни
+     пътища (работи от всяка дълбочина).
+[OK] Проверено по HTTP: всички икони сервират с 200.
+
+────────────────────────────────────────────────────────────────────
+3) SEO / META — ОТ ПРАЗНИ HEAD-ОВЕ ДО ПЪЛЕН ПОРТАЛ
+────────────────────────────────────────────────────────────────────
+[OK] canonical URL на всичките 9 страници (преди имаха само 2).
+[OK] meta description на всяка страница (преди — на 2).
+[OK] Open Graph (og:url, og:title, og:description, og:image) на
+     всяка страница + twitter:image на index и commandhub.
+[OK] og-image.png (1200×630) — нов професионален брандиран банер за
+     споделяне във Viber/LinkedIn/Telegram/X.
+[OK] word-count.html: добавен lang="bg" (липсваше!), изправен
+     charset utf-8.
+[OK] yaml-checker.html: невалиден HTML (<button> вътре в <a>) →
+     чист <a>-линк, стилизиран като таб.
+[OK] sitemap.xml: URL-и + свежи lastmod дати (2026-11-12).
+
+────────────────────────────────────────────────────────────────────
+4) БЪГОВЕ, КОИТО ОДИТЪТ ХВАНА И ПОПРАВИ
+────────────────────────────────────────────────────────────────────
+[BUG 1] encrypt.html: собствен fixed header (z-50) се криеше ЗАД
+        хъб-бара (z-99999) — брендът "FS fedia.eu" беше разрязан и
+        невидим. → header-ът вече е статичен (relative), вижда се
+        перфектно под хъб-бара, main padding-ът е пресякъл.
+[BUG 2] YAML Checker шаблоните бяха за СТАРАЯ блог структура
+        (seoTitle, category, readTime, featured, level, duration,
+        prerequisites — полета, които serafiev.com НЕ ползва) и
+        командите "npm run new:post" НЕ СЪЩЕСТВУВАТ в репото.
+        → Сега шаблоните са по РЕАЛНАТА схема на serafiev.com
+        (content.config.ts): series, part, order, lang, draft,
+        tags, categories, heroImage (".../images/x.webp"),
+        heroImageAlt. Три шаблона: „Статия в серия", „EN статия",
+        „Docs страница".
+[BUG 3] Командите за нова статия → сега: създай
+        src/content/wsl/nova-statia.md (колекции: wsl · proxmox ·
+        docker · linux); npm run dev (преглед); npm run build &&
+        npx wrangler deploy (публикуване).
+[BUG 4] pubDate беше hardcoded 2026-09-21 във всички шаблони →
+        сега се попълва АВТОМАТИЧНО с текущото време при зареждане.
+[BUG 5] md_editor "🛠️ Към Dev Tools" водеше с absolute URL към
+        dev.fedia.eu → сега относителен index.html (работи на
+        всеки домейн).
+
+────────────────────────────────────────────────────────────────────
+5) ХИГИЕНА НА РЕПОТО
+────────────────────────────────────────────────────────────────────
+[OK] ИЗТРИТ „Брояч на думи.html" — стар дубликат на word-count.html
+     от 4.10, с кирилиско име и спейсове в URL, никъде не е
+     линкван. Добавен е 301 redirect в нов файл _redirects (CF
+     Pages), ако някой все пак отвори стария адрес.
+[OK] ИЗТРИТ .wrangler/ (кеш с акаунт информация — не е за git).
+     Добавен в .gitignore (+ .DS_Store).
+[OK] _headers: добавени X-Frame-Options: DENY и
+     Permissions-Policy (camera/microphone/geolocation забранени) +
+     7-дневен кеш за иконите и og-image.
+[OK] _redirects (НОВ): /dev-tools.html → / (301) и старият
+     кирилиски адрес → /word-count.html (301). 301-те са по-добри
+     от JS redirect-ите за SEO.
+[OK] README.md: актуален до v2.2 с пълен changelog на двете версии.
+[OK] Версията е вдигната v2.1 → v2.2 (лого бадж + футър + humans +
+     llms + README).
+
+────────────────────────────────────────────────────────────────────
+6) ПРОВЕРЕНА РАБОТОСПОСОБНОСТ (в браузър)
+────────────────────────────────────────────────────────────────────
+[OK] Всички 9 HTML-а зареждат без грешки в конзолата.
+[OK] Всички inline JS блокове преминали node --check синтаксис.
+[OK] Всяка вътрешна връзка (href/src) сочи съществуващ файл.
+[OK] YAML Checker: зареден шаблон → „Провери" → статус „валиден";
+     динамичната pubDate се появява (2026-11-12T...).
+[OK] CommandHub чете командите, баджът и хъб-барът са с новия бранд.
+[OK] Encryptor: header видим, AES-256-GCM + PBKDF2 600k —
+     криптографията е солидна, не съм пипал логиката.
+[OK] dev-tools.html redirect-ва към index.html.
+
+────────────────────────────────────────────────────────────────────
+7) КАКВО ДА НАПРАВИШ (стъпки при теб)
+────────────────────────────────────────────────────────────────────
+А. Деплой на v2.2 (преди смяната на домейна — може веднага):
+   1. Копирай ЦЕЛИЯ съдържание на папката dev-tools/ в локалното
+      ти копие на fedya-dev/dev-tools (с презапис). Не копирай
+      .git (няма такава папка в пакета — ползвай своята).
+   2. В терминала:
+        git add -A
+        git commit -m "Dev Tools Pro v2.2 — миграция към dev.serafiev.com, единен бранд, SEO одит"
+        git push
+   3. Cloudflare Pages ще build-не автоматично. Нищо друго не трябва.
+
+Б. Смяна на поддомейна (когато си готов):
+   1. Cloudflare Dashboard → Workers & Pages → твоя Pages проект
+      (dev tools) → Custom domains → Set up a custom domain.
+   2. Въведи: dev.serafiev.com → ако зоната serafiev.com е в същия
+      акаунт, CF ще добави CNAME автоматично към
+      <project>.pages.dev и ще активира SSL. Кликни Activate.
+   3. Провери https://dev.serafiev.com/ (иконата ">_" в таба е
+      знак, че новият бранд е жив).
+   4. Старият dev.fedia.eu custom domain: остави го ОЩЕ 1–2 седм.
+      (линковете ще работят), после го махни от Pages проекта.
+      Ако искаш, направи 301 от fedia.eu зоната → dev.serafiev.com
+      (Bulk Redirects или Redirect Rule в CF).
+   5. Google Search Console → Add property → dev.serafiev.com →
+      подай sitemap.xml (URL-ите в него вече са новите).
+   6. llms.txt и sitemap.xml вече сочат новия домейн — нищо
+      допълнително не се пипа.
+
+В. Две неща за реши ТИ (не съм ги пипнал нарочно):
+   1. config.json — паролата е "СМЕНИ-СИ-ПАРОЛАТА-ТУК" и файлът е
+      комитнат в git (макар и в .gitignore — добавен е преди
+      gitignore-а). Клиентска защита е, но смени паролата с реална.
+      NB: ако я смениш, промяната тръгва при следващия push.
+   2. API_URL Worker-ът (command-hub-api.fedia.workers.dev) — ако
+      искаш 100% брандинг под serafiev.com, преименувай Worker-а
+      или добави custom domain на Worker-а и ъпдейни ред 999 в
+      commandhub.html. Аз не го докоснах, за да не счупя sync.
+
+────────────────────────────────────────────────────────────────────
+8) ЧЕКЛИСТ ЗА ГЛАВНИЯ САЙТ (serafiev.com) — за следващия етап
+────────────────────────────────────────────────────────────────────
+Когато бараме serafiev.com, не забравяй там същите 3 урока от този
+одит: (а) canonical + og:url да сочат serafiev.com (не www и не
+стар домейн); (б) favicon.svg/apple-touch-icon/og-image с единен
+бранд на ВСЯКА страница; (в) _redirects за старите URL-и при
+миграция. Шаблоните в yaml-checker вече съвпадат със schema.ts —
+ползвай ги за следващите статии.
+
+Федя — всичко е готов за пуш. Успех със смяната на поддомейна!

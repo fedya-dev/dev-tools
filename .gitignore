@@ -1,1 +1,3 @@
 config.json
+.wrangler/
+.DS_Store
